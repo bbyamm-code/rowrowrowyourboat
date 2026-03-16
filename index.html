@@ -1,9 +1,105 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#111"/><title>RowMeter Debug</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#111;color:#eee;font:13px/1.6 monospace;padding:12px}button{font:inherit;padding:10px 20px;border:none;border-radius:8px;cursor:pointer}#go{background:#F0A500;color:#111;font-size:16px;display:block;margin:20px auto}#copy{background:#333;color:#F0A500;margin:8px 0}.f{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #222}.k{color:#888}.v{color:#F0A500;text-align:right}h2{font-size:12px;color:#666;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 8px}pre{background:#0a0a0a;padding:10px;border-radius:6px;overflow-x:auto;font-size:11px;color:#F0A500;margin:8px 0}#log{color:#666;font-size:10px}p.info{color:#555;font-size:11px;text-align:center;margin:8px}</style></head><body><h1 style="text-align:center;font-size:20px">RowMeter Debug</h1><p class="info">Connect → row a few strokes → tap Copy Data → paste to Claude</p><button id="go" onclick="doConnect()">Connect Rower</button><div id="out"></div><script>
-var dev,ch,pkts=[],latest;
-function toHex(d){var b=[];for(var i=0;i<d.byteLength;i++)b.push(d.getUint8(i).toString(16).padStart(2,'0'));return b.join(' ')}
-function parse(d){var o=0,f=d.getUint16(o,true);o+=2;var r={flags:'0x'+f.toString(16).padStart(4,'0'),flagsBits:f.toString(2).padStart(16,'0').split('').reverse().join(''),fields:{}};if(!(f&1)){r.fields['StrokeRate']=d.getUint8(o)*0.5+' spm';o++;r.fields['StrokeCount']=d.getUint16(o,true);o+=2}else r.fields['StrokeRate']='absent';if(f&2){r.fields['AvgStrokeRate']=d.getUint8(o)*0.5;o++}if(f&4){r.fields['Distance(machine)']=((d.getUint8(o))|(d.getUint8(o+1)<<8)|(d.getUint8(o+2)<<16))+' m';o+=3}if(f&8){var p=d.getUint16(o,true);r.fields['InstPace(machine)']=p+' s/km = '+Math.round(p/2)+' s/500m';o+=2}if(f&16){r.fields['AvgPace(machine)']=d.getUint16(o,true)+' s/km';o+=2}if(f&32){r.fields['InstPower']=d.getInt16(o,true)+' W';o+=2}else r.fields['InstPower']='ABSENT';if(f&64){r.fields['AvgPower']=d.getInt16(o,true)+' W';o+=2}if(f&128){r.fields['Resistance']=d.getInt16(o,true);o+=2}if(f&256){r.fields['TotalEnergy(machine)']=d.getUint16(o,true)+' kcal';o+=2;r.fields['Energy/hr']=d.getUint16(o,true);o+=2;r.fields['Energy/min']=d.getUint8(o);o++}if(f&512){r.fields['HeartRate']=d.getUint8(o)+' bpm';o++}if(f&2048){r.fields['ElapsedTime']=d.getUint16(o,true)+' s';o+=2}r.hex=toHex(d);r.bytes=d.byteLength;r.consumed=o;return r}
-function onN(e){var p=parse(e.target.value);p.time=new Date().toLocaleTimeString();latest=p;pkts.unshift(p);if(pkts.length>20)pkts.pop();render()}
-function render(){if(!latest)return;var h='<button id="copy" onclick="doCopy()">Copy Data</button>';h+='<h2>Flags</h2><pre>'+latest.flags+' = '+latest.flagsBits+' (LSB→MSB)\nBit5(power): '+(latest.flagsBits[5]==='1'?'YES':'NO')+'</pre>';h+='<h2>Fields</h2>';for(var k in latest.fields){var v=latest.fields[k];var c=String(v).includes('absent')||String(v).includes('ABSENT')?'#444':'#F0A500';h+='<div class="f"><span class="k">'+k+'</span><span class="v" style="color:'+c+'">'+v+'</span></div>'}h+='<h2>Raw Hex ('+latest.bytes+' bytes, '+latest.consumed+' consumed)</h2><pre>'+latest.hex+'</pre>';h+='<h2>Packet Log</h2><div id="log">';pkts.forEach(function(p){h+=p.time+' '+p.hex+'<br>'});h+='</div>';document.getElementById('out').innerHTML=h}
-async function doConnect(){try{document.getElementById('go').textContent='Scanning...';if(!navigator.bluetooth)throw new Error('No Web Bluetooth. Use Bluefy on iPhone.');dev=await navigator.bluetooth.requestDevice({filters:[{services:[0x1826]}]});var srv=await dev.gatt.connect();var svc=await srv.getPrimaryService(0x1826);ch=await svc.getCharacteristic(0x2AD1);await ch.startNotifications();ch.addEventListener('characteristicvaluechanged',onN);document.getElementById('go').textContent='Connected: '+dev.name;document.getElementById('go').style.background='#4ADE80'}catch(e){document.getElementById('go').textContent='Connect Rower';alert(e.message)}}
-function doCopy(){var d={device:dev?dev.name:'?',latest:latest,packets:pkts.slice(0,10)};navigator.clipboard?navigator.clipboard.writeText(JSON.stringify(d,null,2)).then(function(){alert('Copied! Paste this to Claude.')}):alert(JSON.stringify(d))}
+<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#0B0C0E"/><title>RowMeter Calibration</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0B0C0E;color:#E8E5DD;font:13px/1.6 'Courier New',monospace;padding:12px;max-width:440px;margin:0 auto}button{font:inherit;border:none;border-radius:8px;cursor:pointer;padding:10px 16px}.r{display:flex;gap:8px;margin-bottom:8px}.c{flex:1;padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px}.lb{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:2px}.bg{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums}.md{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}.ac{color:#F0A500}.gn{color:#4ADE80}.sm{font-size:9px;color:rgba(255,255,255,0.2)}.step{padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:10px}.step.active{border-color:rgba(240,165,0,0.3);background:rgba(240,165,0,0.04)}.step.done{border-color:rgba(74,222,128,0.2);background:rgba(74,222,128,0.03)}.sn{font-size:18px;font-weight:700;margin-bottom:4px}.sd{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:8px}.bar{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin:8px 0}.fill{height:100%;background:#F0A500;border-radius:3px;transition:width 0.3s}.res{font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px}.res b{color:#F0A500}</style></head><body>
+<div id="app" style="text-align:center;padding-top:20vh"><h1 style="font-size:24px;margin-bottom:4px">RowMeter Calibration</h1><p style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:24px">4 efforts × 2 minutes each<br>This builds your personal power curve</p><button id="go" onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-size:15px;padding:14px 40px;border-radius:40px">Connect Rower</button><p id="err" style="color:#FCA5A5;margin-top:12px;font-size:11px"></p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:20px">iPhone: use Bluefy browser</p></div>
+<div id="dash" style="display:none"></div>
+<script>
+var dev,ch,D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,et:0};
+var STEPS=[
+  {name:"Easy",desc:"Light paddle. Conversational effort. Think 60% max.",time:120,c2:"~2:30 split on C2"},
+  {name:"Moderate",desc:"Steady state. Breathing harder but sustainable.",time:120,c2:"~2:10 split on C2"},
+  {name:"Hard",desc:"Race pace effort. Hard to talk.",time:120,c2:"~1:50 split on C2"},
+  {name:"Sprint",desc:"All out. Maximum power for the full 2 minutes.",time:120,c2:"~1:35 split on C2"}
+];
+var cur=-1,timer=null,sec=0,recording=false;
+var samples=[],results=[];
+function onN(e){
+  var d=e.target.value,o=0,f=d.getUint16(o,true);o+=2;
+  if(!(f&1)){D.sr=d.getUint8(o)*0.5;o++;D.sc=d.getUint16(o,true);o+=2}
+  if(f&2){o++}
+  if(f&4){D.mDist=(d.getUint8(o))|(d.getUint8(o+1)<<8)|(d.getUint8(o+2)<<16);o+=3}
+  if(f&8){D.mPace=d.getUint16(o,true);o+=2}
+  if(f&16){o+=2}
+  if(f&32){D.mW=d.getInt16(o,true);o+=2}
+  if(f&64){D.mAvgW=d.getInt16(o,true);o+=2}
+  if(f&128){o+=2}
+  if(f&256){o+=5}
+  if(f&512){o++}
+  if(f&2048){D.et=d.getUint16(o,true);o+=2}
+  if(recording&&D.mW>0)samples.push(D.mW);
+  render()
+}
+function startStep(){
+  cur++;if(cur>=STEPS.length){render();return}
+  sec=STEPS[cur].time;samples=[];recording=true;
+  timer=setInterval(function(){
+    sec--;
+    if(sec<=0){
+      clearInterval(timer);recording=false;
+      var avg=samples.length>0?samples.reduce(function(a,b){return a+b},0)/samples.length:0;
+      var max=samples.length>0?Math.max.apply(null,samples):0;
+      var p=D.mPace>0?Math.round(D.mPace/2):0;
+      results.push({name:STEPS[cur].name,avgW:Math.round(avg*10)/10,maxW:max,samples:samples.length,machPace500:p,dist:D.mDist});
+    }
+    render()
+  },1000)
+}
+function fT(s){var m=Math.floor(s/60),se=s%60;return m+":"+String(se).padStart(2,"0")}
+function doCopy(){
+  var d={device:dev?dev.name:"?",calibration:results,raw_samples:results.map(function(r,i){return{step:STEPS[i].name,avgWatts:r.avgW,maxWatts:r.maxW,machPace500:r.machPace500,sampleCount:r.samples,distance:r.dist}})};
+  var t=JSON.stringify(d,null,2);
+  navigator.clipboard?navigator.clipboard.writeText(t).then(function(){alert("Copied! Paste this to Claude.")}):alert(t)
+}
+function render(){
+  var h='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:12px"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px rgba(74,222,128,0.4);margin-right:8px"></span><b>'+dev.name+'</b></div><span style="font-size:9px;color:rgba(255,255,255,0.2)">CALIBRATION</span></div>';
+  if(cur>=0&&cur<STEPS.length&&sec>0){
+    h+='<div style="text-align:center;margin-bottom:16px"><div style="font-size:11px;color:#F0A500;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">'+STEPS[cur].name+' effort</div>';
+    h+='<div style="font-size:56px;font-weight:700;font-variant-numeric:tabular-nums">'+fT(sec)+'</div>';
+    h+='<div style="font-size:10px;color:rgba(255,255,255,0.3)">Keep rowing steadily</div></div>';
+    h+='<div class="r"><div class="c"><div class="lb">Live watts</div><div class="md ac">'+D.mW+'</div></div>';
+    h+='<div class="c"><div class="lb">SPM</div><div class="md">'+D.sr+'</div></div>';
+    h+='<div class="c"><div class="lb">Samples</div><div class="md">'+samples.length+'</div></div></div>';
+    var pct=Math.round(((STEPS[cur].time-sec)/STEPS[cur].time)*100);
+    h+='<div class="bar"><div class="fill" style="width:'+pct+'%"></div></div>';
+  }
+  for(var i=0;i<STEPS.length;i++){
+    var done=i<results.length;
+    var active=i===cur&&sec>0;
+    var cls=done?"step done":active?"step active":"step";
+    h+='<div class="'+cls+'">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center"><div class="sn">'+(i+1)+'. '+STEPS[i].name+'</div>';
+    if(done)h+='<span class="gn" style="font-size:12px;font-weight:700">DONE</span>';
+    else if(active)h+='<span class="ac" style="font-size:12px;font-weight:700">RECORDING</span>';
+    h+='</div>';
+    h+='<div class="sd">'+STEPS[i].desc+'<br>Target: '+STEPS[i].c2+' · Duration: '+STEPS[i].time+'s</div>';
+    if(done){
+      h+='<div class="res">Avg: <b>'+results[i].avgW+'W</b> · Max: <b>'+results[i].maxW+'W</b> · Machine pace: <b>'+(results[i].machPace500>0?Math.floor(results[i].machPace500/60)+":"+String(results[i].machPace500%60).padStart(2,"0"):"--")+'</b>/500m · '+results[i].samples+' samples</div>';
+    }
+    h+='</div>';
+  }
+  if(results.length>=STEPS.length){
+    h+='<div style="padding:14px;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.15);border-radius:10px;margin-top:12px;text-align:center">';
+    h+='<div style="font-size:14px;font-weight:700;color:#4ADE80;margin-bottom:8px">Calibration Complete!</div>';
+    h+='<p style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:12px">Tap Copy Results, go back to Claude, and paste it. I\'ll build your personalised app.</p>';
+    h+='<button onclick="doCopy()" style="background:#4ADE80;color:#0B0C0E;font-size:14px;padding:12px 32px;border-radius:40px;font-weight:700">Copy Results</button></div>';
+  } else if(recording&&sec>0){
+    h+='<p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.3);margin-top:8px">Keep rowing at '+STEPS[cur].name.toLowerCase()+' effort until the timer ends</p>';
+  } else {
+    var label=cur<0?"Start Calibration":"Next: "+STEPS[cur+1].name+" Effort";
+    if(cur+1>=STEPS.length&&results.length<STEPS.length)label="Next: "+STEPS[results.length].name+" Effort";
+    if(results.length<STEPS.length){
+      h+='<div style="text-align:center;margin-top:12px"><button onclick="startStep()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-size:14px;padding:12px 32px;border-radius:40px;font-weight:600">'+label+'</button>';
+      if(results.length>0)h+='<p style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:8px">Rest 1-2 min between efforts</p>';
+      h+='</div>';
+    }
+  }
+  document.getElementById('dash').innerHTML=h
+}
+async function doConnect(){
+  try{document.getElementById('err').textContent='';document.getElementById('go').textContent='Scanning...';
+  if(!navigator.bluetooth)throw new Error('Use Bluefy on iPhone');
+  dev=await navigator.bluetooth.requestDevice({filters:[{services:[0x1826]}]});
+  var srv=await dev.gatt.connect();var svc=await srv.getPrimaryService(0x1826);
+  ch=await svc.getCharacteristic(0x2AD1);await ch.startNotifications();
+  ch.addEventListener('characteristicvaluechanged',onN);
+  document.getElementById('app').style.display='none';document.getElementById('dash').style.display='block';
+  render()}catch(e){document.getElementById('go').textContent='Connect Rower';if(e.name!=='NotFoundError')document.getElementById('err').textContent=e.message}}
 </script></body></html>
