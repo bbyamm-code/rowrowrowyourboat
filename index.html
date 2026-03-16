@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0B0C0E"/>
+<title>RowMeter</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Anybody:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{min-height:100vh;min-height:100dvh;background:#0B0C0E}
+body{font-family:'DM Mono','Courier New',monospace;color:#E8E5DD;-webkit-font-smoothing:antialiased}
+button{-webkit-tap-highlight-color:transparent}
+input[type=range]{width:100%}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script type="text/babel">
+const{useState,useEffect,useRef,useCallback,useMemo}=React;
+const FTMS=0x1826,RD=0x2AD1;
+function w2v(w){return w<=0?0:Math.pow(w/2.8,1/3)}
+function w2p(w){const v=w2v(w);return v<=0?null:500/v}
+function w2c(w){return w<=0?0:(4*w*0.8604)+300}
+function parseFTMS(d){
+  let o=0;const f=d.getUint16(o,true);o+=2;
+  const r={rawWatts:null,strokeRate:null,strokeCount:null,heartRate:null,resistanceLevel:null};
+  if(!(f&0x0001)){r.strokeRate=d.getUint8(o)*0.5;o+=1;r.strokeCount=d.getUint16(o,true);o+=2}
+  if(f&0x0002){o+=1}
+  if(f&0x0004){o+=3}
+  if(f&0x0008){o+=2}
+  if(f&0x0010){o+=2}
+  if(f&0x0020){r.rawWatts=d.getInt16(o,true);o+=2}
+  if(f&0x0040){o+=2}
+  if(f&0x0080){r.resistanceLevel=d.getInt16(o,true);o+=2}
+  if(f&0x0100){o+=5}
+  if(f&0x0200){r.heartRate=d.getUint8(o);o+=1}
+  return r;
+}
+function fP(s){if(s==null||!isFinite(s)||s<=0)return"\u2013:\u2013\u2013";const m=Math.floor(s/60),se=Math.floor(s%60),t=Math.floor((s%1)*10);return m+":"+String(se).padStart(2,"0")+"."+t}
+function fT(s){if(s==null)return"00:00";const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),se=Math.floor(s%60);return h>0?h+":"+String(m).padStart(2,"0")+":"+String(se).padStart(2,"0"):String(m).padStart(2,"0")+":"+String(se).padStart(2,"0")}
+function fD(m){return m>=1000?(m/1000).toFixed(2):Math.floor(m).toString()}
+function dU(m){return m>=1000?"km":"m"}
+const SK="rowmeter_v2";
+function ldS(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r)}catch(e){}return{calibration:1.0,sessions:[]}}
+function svS(s){try{localStorage.setItem(SK,JSON.stringify(s))}catch(e){}}
+
+function Spark({values,height=48,color="#F0A500",invert=false}){
+  if(values.length<2)return null;
+  const w=300,max=Math.max(...values),min=Math.min(...values),range=max-min||1;
+  const pts=values.map((v,i)=>{const x=(i/(values.length-1))*w;const n=(v-min)/range;const y=invert?(n*(height-6)+3):(height-n*(height-6)-3);return x+","+y}).join(" ");
+  const fill="0,"+height+" "+pts+" "+w+","+height;
+  const gid="g"+color.replace("#","")+(invert?"i":"n");
+  return React.createElement("svg",{width:w,height,style:{display:"block",width:"100%",height}},
+    React.createElement("defs",null,React.createElement("linearGradient",{id:gid,x1:"0",y1:"0",x2:"0",y2:"1"},React.createElement("stop",{offset:"0%",stopColor:color,stopOpacity:"0.25"}),React.createElement("stop",{offset:"100%",stopColor:color,stopOpacity:"0.02"}))),
+    React.createElement("polygon",{points:fill,fill:"url(#"+gid+")"}),
+    React.createElement("polyline",{points:pts,fill:"none",stroke:color,strokeWidth:"1.5",strokeLinejoin:"round"}))
+}
+
+const S={
+  root:{minHeight:"100vh",background:"#0B0C0E",color:"#E8E5DD",fontFamily:"'DM Mono','Courier New',monospace",padding:"0 12px 40px",maxWidth:440,margin:"0 auto"},
+  label:{fontSize:9,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"rgba(255,255,255,0.32)",lineHeight:1,marginBottom:3},
+  bigN:function(a){return{fontSize:38,fontWeight:700,lineHeight:1,color:a?"#F0A500":"#E8E5DD",fontVariantNumeric:"tabular-nums"}},
+  medN:function(a){return{fontSize:24,fontWeight:600,lineHeight:1,color:a?"#F0A500":"#E8E5DD",fontVariantNumeric:"tabular-nums"}},
+  unit:{fontSize:10,color:"rgba(255,255,255,0.25)",marginLeft:3},
+  card:function(b){return{padding:"10px 12px",borderRadius:8,background:"rgba(255,255,255,0.02)",border:"1px solid "+(b||"rgba(255,255,255,0.05)"),display:"flex",flexDirection:"column",gap:2,flex:"1 1 0"}},
+  row:{display:"flex",gap:8,marginBottom:8},
+  btn:function(bg,c){return{padding:"10px 16px",fontSize:12,fontWeight:600,border:"none",borderRadius:8,cursor:"pointer",fontFamily:"inherit",letterSpacing:"0.06em",background:bg,color:c}},
+  dv:{height:1,background:"rgba(255,255,255,0.06)",margin:"12px 0"},
+  tag:{display:"inline-block",padding:"3px 8px",borderRadius:4,fontSize:9,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",background:"rgba(240,165,0,0.12)",color:"#F0A500"}
+};
+
+function App(){
+  const[ps,setPs]=useState(ldS);
+  const[conn,setConn]=useState(false);
+  const[conning,setConning]=useState(false);
+  const[devN,setDevN]=useState("");
+  const[err,setErr]=useState(null);
+  const[showCal,setShowCal]=useState(false);
+  const[showHist,setShowHist]=useState(false);
+  const[showPhys,setShowPhys]=useState(false);
+  const[rawW,setRawW]=useState(0);
+  const[sRate,setSRate]=useState(0);
+  const[sCnt,setSCnt]=useState(0);
+  const[hr,setHr]=useState(null);
+  const[res,setRes]=useState(null);
+  const[cDist,setCDist]=useState(0);
+  const[cCal,setCCal]=useState(0);
+  const[elapsed,setElapsed]=useState(0);
+  const[pH,setPH]=useState([]);
+  const[paH,setPaH]=useState([]);
+  const[rowing,setRowing]=useState(false);
+
+  const devR=useRef(null),chR=useRef(null),ltR=useRef(null);
+  const distR=useRef(0),calR=useRef(0),elR=useRef(0);
+  const tmR=useRef(null),stR=useRef(null);
+  const phR=useRef([]),paR=useRef([]),waR=useRef([]),lscR=useRef(0);
+
+  const cal=ps.calibration;
+  const cw=Math.max(0,rawW*cal);
+  const vel=w2v(cw),pace=w2p(cw),cph=w2c(cw);
+  const avgW=useMemo(()=>pH.length===0?0:pH.reduce((a,b)=>a+b,0)/pH.length,[pH]);
+  const avgP=w2p(avgW);
+  const dps=sCnt>0?cDist/sCnt:0;
+
+  const onData=useCallback((ev)=>{
+    const p=parseFTMS(ev.target.value);const now=performance.now();const c=ps.calibration;
+    if(p.rawWatts!=null){
+      setRawW(p.rawWatts);const w=Math.max(0,p.rawWatts*c);
+      if(ltR.current!=null&&w>0){const dt=(now-ltR.current)/1000;const v=w2v(w);distR.current+=v*dt;setCDist(distR.current);calR.current+=(w2c(w)/3600)*dt;setCCal(calR.current)}
+      ltR.current=now;
+      if(w>0){phR.current=[...phR.current.slice(-119),w];setPH([...phR.current]);const pc=w2p(w);if(pc&&isFinite(pc)){paR.current=[...paR.current.slice(-119),pc];setPaH([...paR.current])}waR.current.push(w)}
+    }
+    if(p.strokeRate!=null){setSRate(p.strokeRate);if(p.strokeRate>0&&!stR.current){stR.current=Date.now();setRowing(true)}}
+    if(p.strokeCount!=null){setSCnt(p.strokeCount);lscR.current=p.strokeCount}
+    if(p.heartRate!=null&&p.heartRate>0)setHr(p.heartRate);
+    if(p.resistanceLevel!=null)setRes(p.resistanceLevel);
+  },[ps.calibration]);
+
+  useEffect(()=>{if(conn){tmR.current=setInterval(()=>{if(stR.current){elR.current=Math.floor((Date.now()-stR.current)/1000);setElapsed(elR.current)}},250)}return()=>clearInterval(tmR.current)},[conn]);
+
+  const connect=useCallback(async()=>{
+    setErr(null);setConning(true);
+    try{
+      if(!navigator.bluetooth)throw new Error("Web Bluetooth not available. On iPhone use Bluefy (free, App Store). On desktop/Android use Chrome.");
+      const dev=await navigator.bluetooth.requestDevice({filters:[{services:[FTMS]}]});
+      devR.current=dev;setDevN(dev.name||"Rower");
+      dev.addEventListener("gattserverdisconnected",()=>{setConn(false);setRowing(false)});
+      const srv=await dev.gatt.connect();const svc=await srv.getPrimaryService(FTMS);
+      const ch=await svc.getCharacteristic(RD);chR.current=ch;
+      await ch.startNotifications();ch.addEventListener("characteristicvaluechanged",onData);setConn(true);
+    }catch(e){if(e.name!=="NotFoundError")setErr(e.message)}finally{setConning(false)}
+  },[onData]);
+
+  const disconnect=useCallback(()=>{if(chR.current)chR.current.removeEventListener("characteristicvaluechanged",onData);if(devR.current?.gatt?.connected)devR.current.gatt.disconnect();setConn(false);setRowing(false)},[onData]);
+
+  const reset=useCallback(()=>{
+    if(cDist>10||sCnt>5){
+      const sess={date:new Date().toISOString(),distance:Math.round(cDist),strokes:lscR.current,duration:elR.current,calories:Math.round(calR.current),avgWatts:waR.current.length>0?Math.round(waR.current.reduce((a,b)=>a+b,0)/waR.current.length):0,avgPace:null};
+      if(sess.avgWatts>0)sess.avgPace=w2p(sess.avgWatts);
+      const ns={...ps,sessions:[...ps.sessions,sess].slice(-50)};setPs(ns);svS(ns);
+    }
+    setRawW(0);setSRate(0);setSCnt(0);setHr(null);setRes(null);setCDist(0);setCCal(0);setElapsed(0);setPH([]);setPaH([]);setRowing(false);
+    distR.current=0;calR.current=0;elR.current=0;ltR.current=null;stR.current=null;phR.current=[];paR.current=[];waR.current=[];lscR.current=0;
+  },[cDist,sCnt,ps]);
+
+  const setCal=useCallback((v)=>{const val=Math.max(0.5,Math.min(2.0,v));const ns={...ps,calibration:val};setPs(ns);svS(ns)},[ps]);
+  const clearHist=useCallback(()=>{const ns={...ps,sessions:[]};setPs(ns);svS(ns)},[ps]);
+
+  if(!conn){return(
+    React.createElement("div",{style:S.root},
+      React.createElement("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"85vh",gap:28,textAlign:"center",padding:"0 20px"}},
+        React.createElement("div",{style:{position:"relative",width:72,height:72}},
+          React.createElement("div",{style:{position:"absolute",inset:0,border:"2px solid rgba(240,165,0,0.15)",borderRadius:"50%"}}),
+          React.createElement("div",{style:{position:"absolute",inset:8,border:"2px solid rgba(240,165,0,0.25)",borderRadius:"50%"}}),
+          React.createElement("div",{style:{position:"absolute",inset:16,border:"2px solid rgba(240,165,0,0.4)",borderRadius:"50%"}}),
+          React.createElement("div",{style:{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:10,height:10,borderRadius:"50%",background:"#F0A500"}}),
+          React.createElement("div",{style:{position:"absolute",top:"50%",left:"50%",width:30,height:2,background:"linear-gradient(90deg, #F0A500, transparent)",transform:"translate(-2px,-1px) rotate(-30deg)",transformOrigin:"left center"}})
+        ),
+        React.createElement("div",null,
+          React.createElement("h1",{style:{fontSize:32,fontWeight:900,fontFamily:"'Anybody',sans-serif",margin:"0 0 6px",letterSpacing:"-0.03em"}},"RowMeter"),
+          React.createElement("p",{style:{fontSize:11,color:"rgba(255,255,255,0.35)",margin:0,lineHeight:1.6}},"Physics-based rowing monitor",React.createElement("br"),"Concept2 formulas \u00B7 your MR-950")
+        ),
+        React.createElement("div",{style:{background:"rgba(240,165,0,0.06)",border:"1px solid rgba(240,165,0,0.12)",borderRadius:10,padding:"14px 18px",maxWidth:320,textAlign:"left"}},
+          React.createElement("div",{style:{fontSize:10,fontWeight:700,color:"#F0A500",letterSpacing:"0.1em",marginBottom:6,textTransform:"uppercase"}},"How this works"),
+          React.createElement("p",{style:{fontSize:11,color:"rgba(255,255,255,0.45)",margin:0,lineHeight:1.7}},"Reads raw ",React.createElement("strong",{style:{color:"rgba(255,255,255,0.6)"}},"watts")," and ",React.createElement("strong",{style:{color:"rgba(255,255,255,0.6)"}},"stroke events")," from your rower via Bluetooth FTMS. Ignores the machine\u2019s built-in pace/distance/calorie calculations. Recomputes everything using ",React.createElement("strong",{style:{color:"rgba(255,255,255,0.6)"}},"Concept2 physics"),".")
+        ),
+        React.createElement("button",{onClick:connect,disabled:conning,style:{...S.btn("linear-gradient(135deg, #F0A500, #D48E00)","#0B0C0E"),padding:"14px 44px",fontSize:14,borderRadius:40,boxShadow:"0 4px 24px rgba(240,165,0,0.2)",opacity:conning?0.6:1}},conning?"Scanning\u2026":"Connect Rower"),
+        err&&React.createElement("div",{style:{padding:"10px 14px",background:"rgba(255,80,80,0.08)",border:"1px solid rgba(255,80,80,0.15)",borderRadius:8,fontSize:11,color:"#FCA5A5",maxWidth:320,lineHeight:1.5}},err),
+        React.createElement("div",{style:{padding:"12px 16px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:8,fontSize:10,color:"rgba(255,255,255,0.25)",maxWidth:320,lineHeight:1.6,textAlign:"left"}},React.createElement("strong",{style:{color:"rgba(255,255,255,0.4)"}},"iPhone:")," Safari doesn\u2019t support Web Bluetooth. Use ",React.createElement("strong",{style:{color:"#F0A500"}},"Bluefy")," (free, App Store). Android/desktop: Chrome works."),
+        ps.sessions.length>0&&React.createElement("div",{style:{width:"100%",maxWidth:340,textAlign:"left"}},
+          React.createElement("button",{onClick:()=>setShowHist(!showHist),style:{...S.btn("transparent","rgba(255,255,255,0.35)"),padding:"6px 0",fontSize:10,letterSpacing:"0.1em"}},(showHist?"\u25BE":"\u25B8")+" PAST SESSIONS ("+ps.sessions.length+")"),
+          showHist&&React.createElement("div",{style:{marginTop:8}},
+            ps.sessions.slice().reverse().map((s,i)=>React.createElement("div",{key:i,style:{padding:"8px 10px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)",borderRadius:6,marginBottom:4,fontSize:10,color:"rgba(255,255,255,0.4)",lineHeight:1.7}},
+              React.createElement("div",{style:{color:"rgba(255,255,255,0.55)"}},new Date(s.date).toLocaleDateString()+" \u00B7 "+fT(s.duration)),
+              React.createElement("div",null,fD(s.distance)+dU(s.distance)+" \u00B7 "+s.strokes+" strokes \u00B7 "+s.avgWatts+"W \u00B7 "+(s.avgPace?fP(s.avgPace):"\u2013")+"/500m \u00B7 "+s.calories+"kcal")
+            )),
+            React.createElement("button",{onClick:clearHist,style:{...S.btn("rgba(255,80,80,0.08)","#FCA5A5"),marginTop:6,fontSize:10,padding:"6px 12px"}},"Clear History")
+          )
+        )
+      )
+    )
+  )}
+
+  return React.createElement("div",{style:S.root},
+    React.createElement("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0 10px",borderBottom:"1px solid rgba(255,255,255,0.05)"}},
+      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:8}},
+        React.createElement("div",{style:{width:7,height:7,borderRadius:"50%",background:"#4ADE80",boxShadow:"0 0 6px rgba(74,222,128,0.4)"}}),
+        React.createElement("span",{style:{fontSize:11,fontWeight:700,letterSpacing:"0.08em"}},devN)
+      ),
+      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:8}},
+        cal!==1.0&&React.createElement("span",{style:S.tag},"CAL \u00D7"+cal.toFixed(2)),
+        React.createElement("span",{style:{fontSize:9,color:"rgba(255,255,255,0.2)",letterSpacing:"0.1em"}},"FTMS\u2192C2")
+      )
+    ),
+    React.createElement("div",{style:{textAlign:"center",padding:"16px 0 6px"}},
+      React.createElement("div",{style:{fontSize:52,fontWeight:700,fontVariantNumeric:"tabular-nums",letterSpacing:"-0.03em"}},fT(elapsed)),
+      React.createElement("div",{style:{fontSize:9,letterSpacing:"0.14em",color:rowing?"#4ADE80":"rgba(255,255,255,0.25)",fontWeight:700,marginTop:2,textTransform:"uppercase"}},rowing?(sRate>0?"rowing":"paused"):"ready")
+    ),
+    React.createElement("div",{style:S.row},
+      React.createElement("div",{style:S.card("rgba(240,165,0,0.15)")},React.createElement("div",{style:S.label},"Pace /500m"),React.createElement("span",{style:S.bigN(true)},fP(pace)),React.createElement("div",{style:{fontSize:9,color:"rgba(255,255,255,0.2)",marginTop:2}},"avg "+fP(avgP))),
+      React.createElement("div",{style:S.card()},React.createElement("div",{style:S.label},"Distance"),React.createElement("div",{style:{display:"flex",alignItems:"baseline"}},React.createElement("span",{style:S.bigN(false)},fD(cDist)),React.createElement("span",{style:S.unit},dU(cDist))),React.createElement("div",{style:{fontSize:9,color:"rgba(255,255,255,0.2)",marginTop:2}},dps>0?dps.toFixed(1)+"m/stroke":"\u2013"))
+    ),
+    React.createElement("div",{style:S.row},
+      React.createElement("div",{style:S.card()},React.createElement("div",{style:S.label},"SPM"),React.createElement("span",{style:S.medN(false)},sRate)),
+      React.createElement("div",{style:S.card()},React.createElement("div",{style:S.label},"Strokes"),React.createElement("span",{style:S.medN(false)},sCnt)),
+      React.createElement("div",{style:S.card("rgba(240,165,0,0.1)")},React.createElement("div",{style:S.label},"Watts"),React.createElement("span",{style:S.medN(true)},Math.round(cw)),React.createElement("div",{style:{fontSize:9,color:"rgba(255,255,255,0.2)"}},"avg "+Math.round(avgW)))
+    ),
+    pH.length>2&&React.createElement("div",{style:{...S.card(),marginBottom:8,padding:"10px 12px"}},
+      React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}},React.createElement("span",{style:S.label},"Power Trend"),React.createElement("span",{style:{fontSize:9,color:"rgba(255,255,255,0.2)"}},Math.round(Math.min(...pH))+"\u2013"+Math.round(Math.max(...pH))+"W")),
+      React.createElement(Spark,{values:pH,height:44,color:"#F0A500"})
+    ),
+    paH.length>2&&React.createElement("div",{style:{...S.card(),marginBottom:8,padding:"10px 12px"}},
+      React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}},React.createElement("span",{style:S.label},"Pace Trend"),React.createElement("span",{style:{fontSize:9,color:"rgba(255,255,255,0.2)"}},fP(Math.min(...paH))+"\u2013"+fP(Math.max(...paH)))),
+      React.createElement(Spark,{values:paH,height:44,color:"#4ADE80",invert:true})
+    ),
+    React.createElement("div",{style:S.row},
+      React.createElement("div",{style:S.card()},React.createElement("div",{style:S.label},"Calories"),React.createElement("span",{style:S.medN(false)},Math.round(cCal)),React.createElement("div",{style:{fontSize:9,color:"rgba(255,255,255,0.2)"}},Math.round(cph)+" kcal/hr")),
+      React.createElement("div",{style:S.card()},React.createElement("div",{style:S.label},"Velocity"),React.createElement("span",{style:S.medN(false)},vel.toFixed(2)),React.createElement("span",{style:S.unit},"m/s")),
+      hr&&React.createElement("div",{style:S.card()},React.createElement("div",{style:S.label},"HR"),React.createElement("span",{style:S.medN(false)},hr),React.createElement("span",{style:S.unit},"bpm"))
+    ),
+    res!=null&&React.createElement("div",{style:{...S.row,marginBottom:0}},
+      React.createElement("div",{style:S.card()},React.createElement("div",{style:S.label},"Resistance"),React.createElement("span",{style:S.medN(false)},res)),
+      React.createElement("div",{style:S.card()},React.createElement("div",{style:S.label},"Raw Machine W"),React.createElement("span",{style:S.medN(false)},rawW),React.createElement("div",{style:{fontSize:9,color:"rgba(255,255,255,0.2)"}},"\u00D7"+cal.toFixed(2)+" \u2192 "+Math.round(cw)))
+    ),
+    React.createElement("div",{style:S.dv}),
+    React.createElement("div",{style:{display:"flex",gap:8,flexWrap:"wrap"}},
+      React.createElement("button",{onClick:reset,style:S.btn("rgba(255,255,255,0.04)","rgba(255,255,255,0.5)")},"Reset"),
+      React.createElement("button",{onClick:()=>setShowCal(!showCal),style:S.btn("rgba(240,165,0,0.08)","#F0A500")},"Calibrate"),
+      React.createElement("button",{onClick:()=>setShowPhys(!showPhys),style:S.btn("rgba(255,255,255,0.04)","rgba(255,255,255,0.35)")},"Physics"),
+      React.createElement("button",{onClick:disconnect,style:S.btn("rgba(255,80,80,0.06)","#FCA5A5")},"Disconnect")
+    ),
+    showCal&&React.createElement("div",{style:{marginTop:12,padding:14,background:"rgba(240,165,0,0.04)",border:"1px solid rgba(240,165,0,0.1)",borderRadius:10}},
+      React.createElement("div",{style:{...S.label,color:"#F0A500",marginBottom:8}},"Watt Calibration"),
+      React.createElement("p",{style:{fontSize:11,color:"rgba(255,255,255,0.4)",margin:"0 0 10px",lineHeight:1.6}},"Adjust if watts feel wrong vs. a known benchmark. 1.00 = no change."),
+      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:10}},
+        React.createElement("input",{type:"range",min:"0.50",max:"2.00",step:"0.01",value:cal,onChange:e=>setCal(parseFloat(e.target.value)),style:{flex:1,accentColor:"#F0A500"}}),
+        React.createElement("span",{style:{fontSize:16,fontWeight:700,color:"#F0A500",minWidth:50,textAlign:"right"}},"\u00D7"+cal.toFixed(2))
+      ),
+      React.createElement("div",{style:{display:"flex",gap:6,marginTop:8,flexWrap:"wrap"}},
+        [0.80,0.90,1.00,1.10,1.20,1.30].map(v=>React.createElement("button",{key:v,onClick:()=>setCal(v),style:{...S.btn(cal===v?"rgba(240,165,0,0.2)":"rgba(255,255,255,0.04)",cal===v?"#F0A500":"rgba(255,255,255,0.35)"),padding:"5px 10px",fontSize:10}},"\u00D7"+v.toFixed(2)))
+      )
+    ),
+    showPhys&&React.createElement("div",{style:{marginTop:12,padding:14,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10}},
+      React.createElement("div",{style:{...S.label,color:"#4ADE80",marginBottom:8}},"How RowMeter computes your metrics"),
+      React.createElement("div",{style:{fontSize:11,color:"rgba(255,255,255,0.45)",lineHeight:1.8}},
+        React.createElement("p",{style:{margin:"0 0 8px"}},React.createElement("strong",{style:{color:"rgba(255,255,255,0.6)"}},"The problem:")," Your MR-950 sends pre-computed pace, distance, and calories over Bluetooth. Those use unknown firmware formulas."),
+        React.createElement("p",{style:{margin:"0 0 8px"}},React.createElement("strong",{style:{color:"rgba(255,255,255,0.6)"}},"Our approach:")," We only read watts, then derive everything using the Concept2 model:"),
+        React.createElement("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,background:"rgba(0,0,0,0.3)",padding:"10px 12px",borderRadius:6,lineHeight:2,margin:"8px 0",color:"rgba(255,255,255,0.55)"}},
+          React.createElement("div",null,React.createElement("span",{style:{color:"#F0A500"}},"velocity")," = \u221B(watts / 2.8) m/s"),
+          React.createElement("div",null,React.createElement("span",{style:{color:"#F0A500"}},"pace/500m")," = 500 / velocity sec"),
+          React.createElement("div",null,React.createElement("span",{style:{color:"#F0A500"}},"distance")," = \u03A3(velocity \u00D7 \u0394t) integrated"),
+          React.createElement("div",null,React.createElement("span",{style:{color:"#F0A500"}},"cal/hr")," = 4 \u00D7 watts \u00D7 0.8604 + 300")
+        ),
+        React.createElement("p",{style:{margin:0}},React.createElement("strong",{style:{color:"rgba(255,255,255,0.6)"}},"Limitation:")," We can\u2019t access raw flywheel pulse data over FTMS. For fully independent measurement, you\u2019d need a hardware mod (reed switch + Raspberry Pi).")
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
