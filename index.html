@@ -1,13 +1,21 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#0B0C0E"/><title>RowMeter</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0B0C0E;color:#E8E5DD;font:13px/1.5 'Courier New',monospace;padding:12px;max-width:440px;margin:0 auto}button{font:inherit;border:none;border-radius:8px;cursor:pointer;padding:10px 16px;letter-spacing:0.04em}.r{display:flex;gap:8px;margin-bottom:8px}.c{flex:1;padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px}.ca{border-color:rgba(240,165,0,0.2)}.lb{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:2px}.bg{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}.md{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}.ac{color:#F0A500!important}.sm{font-size:9px;color:rgba(255,255,255,0.2);margin-top:2px}.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:12px}.ctr{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap}.cmp{padding:10px;background:rgba(240,165,0,0.04);border:1px solid rgba(240,165,0,0.1);border-radius:8px;margin-bottom:8px;font-size:11px;color:rgba(255,255,255,0.45)}.cmp b{color:#F0A500}.spark{padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px}</style></head><body>
-<div id="app" style="text-align:center;padding-top:25vh"><h1 style="font-size:26px;margin-bottom:4px">RowMeter</h1><p style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Calibrated for your MR-950</p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-bottom:24px">Corrects pace to C2-equivalent using your personal calibration curve</p><button id="go" onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-size:15px;padding:14px 40px;border-radius:40px">Connect Rower</button><p id="err" style="color:#FCA5A5;margin-top:12px;font-size:11px"></p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:20px">iPhone: use Bluefy browser</p></div>
+<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#0B0C0E"/><title>RowMeter</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0B0C0E;color:#E8E5DD;font:13px/1.5 'Courier New',monospace;padding:12px;max-width:440px;margin:0 auto}button{font:inherit;border:none;border-radius:8px;cursor:pointer;padding:10px 16px;letter-spacing:0.04em}.r{display:flex;gap:8px;margin-bottom:8px}.c{flex:1;padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px}.ca{border-color:rgba(240,165,0,0.2)}.lb{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:2px}.bg{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}.md{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}.ac{color:#F0A500!important}.sm{font-size:9px;color:rgba(255,255,255,0.2);margin-top:2px}.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:12px}.ctr{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap}.cmp{padding:10px;background:rgba(240,165,0,0.04);border:1px solid rgba(240,165,0,0.1);border-radius:8px;margin-bottom:8px;font-size:11px;color:rgba(255,255,255,0.45)}.cmp b{color:#F0A500}.spark{padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;z-index:99;transition:opacity 0.3s;pointer-events:none}.calpanel{margin-top:12px;padding:14px;background:rgba(240,165,0,0.04);border:1px solid rgba(240,165,0,0.1);border-radius:10px}</style></head><body>
+<div id="app" style="text-align:center;padding-top:25vh"><h1 style="font-size:26px;margin-bottom:4px">RowMeter</h1><p style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Calibrated for your MR-950</p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-bottom:24px">C2-equivalent pace · adjustable correction · auto-logs to Sheets</p><button id="go" onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-size:15px;padding:14px 40px;border-radius:40px">Connect Rower</button><p id="err" style="color:#FCA5A5;margin-top:12px;font-size:11px"></p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:20px">iPhone: use Bluefy browser</p></div>
 <div id="dash" style="display:none"></div>
+<div id="toast" class="toast" style="opacity:0"></div>
 <video id="wv" playsinline muted loop style="position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:0.01"><source src="data:video/mp4;base64,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" type="video/mp4"></video>
 <script>
-var dev,ch,wakeLock=null;
+// ═══════════════════════════════════════════════════════════
+// PASTE YOUR GOOGLE APPS SCRIPT URL BELOW
+var SHEET_URL="https://script.google.com/macros/s/AKfycby-_830IOlFXfYkKIqdm85fIu6QbZtHtBUC_mbQFjIccE6A2AfGgeY4UDb5LZvLdNE/exec";
+// ═══════════════════════════════════════════════════════════
+
+var dev,ch,wakeLock=null,showCal=false;
 var D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};
-var cDist=0,cCal=0,lastPaceTime=null,paceHist=[],avgPaceHist=[];
-var startTime=null,elSec=0,elTimer=null,scInitDist=0;
-var sessions=[];try{var s=localStorage.getItem('rm3');if(s)sessions=JSON.parse(s)}catch(e){}
+var cDist=0,cCal=0,lastPaceTime=null,paceHist=[];
+var startTime=null,elSec=0,elTimer=null;
+var sessions=[];try{var s=localStorage.getItem('rm4');if(s)sessions=JSON.parse(s)}catch(e){}
+// Correction strength: 0=raw machine pace, 100=full calibration curve
+var calStr=70;try{var cs=localStorage.getItem('rm4cal');if(cs)calStr=parseInt(cs)}catch(e){}
 
 async function requestWake(){
   try{if('wakeLock' in navigator){wakeLock=await navigator.wakeLock.request('screen');return}}catch(e){}
@@ -19,20 +27,33 @@ function releaseWake(){
 }
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&dev)requestWake()});
 
+function showToast(msg,color){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.background=color||'rgba(74,222,128,0.15)';t.style.color=color?'#FCA5A5':'#4ADE80';
+  t.style.opacity='1';setTimeout(function(){t.style.opacity='0'},2500);
+}
+
+// Calibration curve: MR-950 pace → max correction delta
 var CM=[101,109,118,129];
 var CC=[110,130,159,170];
-
+function maxCorrection(mp){
+  if(mp<=0||mp>600)return 0;
+  var target=mp;
+  if(mp<=CM[0]){var s=(CC[1]-CC[0])/(CM[1]-CM[0]);target=CC[0]+s*(mp-CM[0])}
+  else if(mp>=CM[CM.length-1]){var n=CM.length-1;var s=(CC[n]-CC[n-1])/(CM[n]-CM[n-1]);target=CC[n]+s*(mp-CM[n])}
+  else{for(var i=0;i<CM.length-1;i++){if(mp>=CM[i]&&mp<=CM[i+1]){var t=(mp-CM[i])/(CM[i+1]-CM[i]);target=CC[i]+t*(CC[i+1]-CC[i]);break}}}
+  return target-mp;
+}
 function correctPace(mp){
   if(mp<=0||mp>600)return mp;
-  if(mp<=CM[0]){var s=(CC[1]-CC[0])/(CM[1]-CM[0]);return Math.max(60,CC[0]+s*(mp-CM[0]))}
-  if(mp>=CM[CM.length-1]){var n=CM.length-1;var s=(CC[n]-CC[n-1])/(CM[n]-CM[n-1]);return CC[n]+s*(mp-CM[n])}
-  for(var i=0;i<CM.length-1;i++){
-    if(mp>=CM[i]&&mp<=CM[i+1]){var t=(mp-CM[i])/(CM[i+1]-CM[i]);return CC[i]+t*(CC[i+1]-CC[i])}
-  }
-  return mp;
+  var delta=maxCorrection(mp);
+  return mp+delta*(calStr/100);
 }
 function paceToWatts(p){if(p<=0)return 0;var v=500/p;return 2.8*v*v*v}
 function wattsToCalHr(w){return w<=0?0:(4*w*0.8604)+300}
+function fP(s){if(!s||!isFinite(s)||s<=0)return"\u2013:\u2013\u2013";var m=Math.floor(s/60),se=Math.floor(s%60),t=Math.floor((s%1)*10);return m+":"+String(se).padStart(2,"0")+"."+t}
+function fT(s){if(!s)return"00:00";var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),se=Math.floor(s%60);return h>0?h+":"+String(m).padStart(2,"0")+":"+String(se).padStart(2,"0"):String(m).padStart(2,"0")+":"+String(se).padStart(2,"0")}
+function fD(m){return m>=1000?(m/1000).toFixed(2)+"km":Math.floor(m)+"m"}
 
 function onN(e){
   var d=e.target.value,o=0,f=d.getUint16(o,true);o+=2;
@@ -47,21 +68,32 @@ function onN(e){
   if(f&256){D.te=d.getUint16(o,true);o+=2;o+=2;o++}
   if(f&512){D.hr=d.getUint8(o);o++}
   if(f&2048){D.et=d.getUint16(o,true);o+=2}
-  var now=performance.now();
-  var mp500=D.mPace>0?Math.round(D.mPace/2):0;
+  var now=performance.now();var mp500=D.mPace>0?Math.round(D.mPace/2):0;
   if(mp500>0&&lastPaceTime!=null){
     var dt=(now-lastPaceTime)/1000;var cp=correctPace(mp500);var v=500/cp;
     cDist+=v*dt;var w=paceToWatts(cp);cCal+=(wattsToCalHr(w)/3600)*dt;
     paceHist.push(cp);if(paceHist.length>120)paceHist.shift();
   }
   if(mp500>0)lastPaceTime=now;
-  if(!startTime&&D.sr>0){startTime=Date.now();scInitDist=D.mDist}
+  if(!startTime&&D.sr>0)startTime=Date.now();
   render();
 }
 
-function fP(s){if(!s||!isFinite(s)||s<=0)return"\u2013:\u2013\u2013";var m=Math.floor(s/60),se=Math.floor(s%60),t=Math.floor((s%1)*10);return m+":"+String(se).padStart(2,"0")+"."+t}
-function fT(s){if(!s)return"00:00";var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),se=Math.floor(s%60);return h>0?h+":"+String(m).padStart(2,"0")+":"+String(se).padStart(2,"0"):String(m).padStart(2,"0")+":"+String(se).padStart(2,"0")}
-function fD(m){return m>=1000?(m/1000).toFixed(2)+"km":Math.floor(m)+"m"}
+function saveSession(){
+  if(cDist<20&&D.sc<5)return;
+  var avgMp=D.mAvgPace>0?Math.round(D.mAvgPace/2):0;
+  var avgCp=avgMp>0?correctPace(avgMp):0;var avgCw=paceToWatts(avgCp);
+  var dur=D.et||elSec;
+  var sess={date:new Date().toLocaleDateString(),dur:dur,dist:Math.round(cDist),avgPace:avgCp,cal:Math.round(cCal),strokes:D.sc,calStr:calStr};
+  sessions.push(sess);if(sessions.length>50)sessions.shift();
+  try{localStorage.setItem('rm4',JSON.stringify(sessions))}catch(e){}
+  if(SHEET_URL&&SHEET_URL!=="YOUR_SCRIPT_URL_HERE"){
+    var payload={date:new Date().toLocaleDateString(),time:new Date().toLocaleTimeString(),duration:fT(dur),distance:Math.round(cDist),avgPace:fP(avgCp),calories:Math.round(cCal),strokes:D.sc,avgWatts:Math.round(avgCw),machPace:fP(avgMp),machDist:D.mDist,correctionPct:calStr};
+    fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+      .then(function(){showToast('Saved to Google Sheets')})
+      .catch(function(){showToast('Upload failed \u2014 saved locally','rgba(255,80,80,0.15)')});
+  } else {showToast('Saved locally')}
+}
 
 function spark(vals,w,h,col,inv){
   if(vals.length<2)return'';
@@ -70,18 +102,15 @@ function spark(vals,w,h,col,inv){
   return '<svg width="'+w+'" height="'+h+'" style="display:block;width:100%;height:'+h+'px"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+col+'" stop-opacity="0.2"/><stop offset="100%" stop-color="'+col+'" stop-opacity="0.02"/></linearGradient></defs><polygon points="0,'+h+' '+pts+' '+w+','+h+'" fill="url(#sg)"/><polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
 }
 
+function setCalStr(v){calStr=parseInt(v);try{localStorage.setItem('rm4cal',''+calStr)}catch(e){}render()}
+
 function render(){
   var mp500=D.mPace>0?Math.round(D.mPace/2):0;
-  var cp=mp500>0?correctPace(mp500):0;
-  var cw=paceToWatts(cp);
+  var cp=mp500>0?correctPace(mp500):0;var cw=paceToWatts(cp);
   var avgMp=D.mAvgPace>0?Math.round(D.mAvgPace/2):0;
-  var avgCp=avgMp>0?correctPace(avgMp):0;
-  var avgCw=paceToWatts(avgCp);
-  var calHr=wattsToCalHr(cw);
-  var vel=cp>0?500/cp:0;
-  var dps=D.sc>0?cDist/D.sc:0;
-
-  var h='<div class="hdr"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px rgba(74,222,128,0.4);margin-right:8px"></span><b>'+dev.name+'</b></div><span style="font-size:9px;color:rgba(255,255,255,0.2)">C2-calibrated</span></div>';
+  var avgCp=avgMp>0?correctPace(avgMp):0;var avgCw=paceToWatts(avgCp);
+  var calHr=wattsToCalHr(cw);var vel=cp>0?500/cp:0;var dps=D.sc>0?cDist/D.sc:0;
+  var h='<div class="hdr"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px rgba(74,222,128,0.4);margin-right:8px"></span><b>'+dev.name+'</b></div><span style="font-size:9px;color:rgba(255,255,255,0.2)">correction '+calStr+'%</span></div>';
   h+='<div style="text-align:center;margin-bottom:14px"><div style="font-size:48px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.02em">'+fT(D.et||elSec)+'</div>';
   h+='<div style="font-size:9px;letter-spacing:0.12em;font-weight:700;text-transform:uppercase;color:'+(D.sr>0?'#4ADE80':'rgba(255,255,255,0.25)')+';">'+(D.sr>0?'ROWING':'READY')+'</div></div>';
   h+='<div class="r"><div class="c ca"><div class="lb">Pace /500m</div><div class="bg ac">'+fP(cp)+'</div><div class="sm">avg '+fP(avgCp)+'</div></div>';
@@ -98,14 +127,31 @@ function render(){
   if(D.hr>0){h+='<div class="c"><div class="lb">HR</div><div class="md">'+D.hr+'</div><div class="sm">bpm</div></div>'}
   h+='</div>';
   if(mp500>0){
-    h+='<div class="cmp"><b>Machine raw:</b> '+fP(mp500)+'/500m \u00B7 '+D.mDist+'m<br>';
-    h+='<b>C2-corrected:</b> '+fP(cp)+'/500m \u00B7 '+Math.floor(cDist)+'m<br>';
-    h+='<b>Correction:</b> +'+(cp-mp500>0?Math.round(cp-mp500):0)+'s added to pace</div>';
+    var delta=Math.round(cp-mp500);
+    h+='<div class="cmp"><b>Machine:</b> '+fP(mp500)+'/500m \u00B7 <b>Corrected:</b> '+fP(cp)+'/500m \u00B7 <b>+'+delta+'s</b> ('+calStr+'%)</div>';
   }
   if(D.mRes>0){h+='<div class="r"><div class="c"><div class="lb">Resistance</div><div class="md">'+D.mRes+'</div></div></div>'}
   h+='<div class="ctr">';
-  h+='<button onclick="doReset()" style="background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5)">Reset</button>';
+  h+='<button onclick="doReset()" style="background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5)">Save & Reset</button>';
+  h+='<button onclick="showCal=!showCal;render()" style="background:rgba(240,165,0,0.08);color:#F0A500">Calibrate</button>';
   h+='<button onclick="doDisc()" style="background:rgba(255,80,80,0.06);color:#FCA5A5">Disconnect</button></div>';
+  if(showCal){
+    h+='<div class="calpanel"><div class="lb" style="color:#F0A500;margin-bottom:6px">Correction Strength</div>';
+    h+='<p style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;line-height:1.6">0% = machine\'s raw pace (no correction)<br>100% = full calibration curve<br>Adjust until your pace matches similar effort on a C2.</p>';
+    h+='<div style="display:flex;align-items:center;gap:10px"><input type="range" min="0" max="100" step="5" value="'+calStr+'" oninput="setCalStr(this.value)" style="flex:1;accent-color:#F0A500"/>';
+    h+='<span style="font-size:18px;font-weight:700;color:#F0A500;min-width:45px;text-align:right">'+calStr+'%</span></div>';
+    h+='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">';
+    [0,25,50,70,85,100].forEach(function(v){
+      var sel=calStr===v;
+      h+='<button onclick="setCalStr('+v+')" style="padding:5px 10px;font-size:10px;background:'+(sel?'rgba(240,165,0,0.2)':'rgba(255,255,255,0.04)')+';color:'+(sel?'#F0A500':'rgba(255,255,255,0.35)')+'">'+v+'%</button>';
+    });
+    h+='</div>';
+    if(mp500>0){
+      h+='<div style="margin-top:10px;font-size:10px;color:rgba(255,255,255,0.3);line-height:1.7">';
+      h+='At current effort: machine says <b style="color:rgba(255,255,255,0.5)">'+fP(mp500)+'</b>, corrected to <b style="color:#F0A500">'+fP(cp)+'</b> (+'+Math.round(cp-mp500)+'s)</div>';
+    }
+    h+='</div>';
+  }
   if(sessions.length>0){
     h+='<div style="margin-top:16px"><div class="lb" style="margin-bottom:8px">Past sessions</div>';
     for(var i=sessions.length-1;i>=Math.max(0,sessions.length-10);i--){var ss=sessions[i];
@@ -116,23 +162,8 @@ function render(){
   document.getElementById('dash').innerHTML=h;
 }
 
-function doReset(){
-  if(cDist>20||D.sc>5){
-    var avgMp=D.mAvgPace>0?Math.round(D.mAvgPace/2):0;var avgCp=avgMp>0?correctPace(avgMp):0;
-    sessions.push({date:new Date().toLocaleDateString(),dur:D.et||elSec,dist:Math.round(cDist),avgPace:avgCp,cal:Math.round(cCal),strokes:D.sc});
-    if(sessions.length>50)sessions.shift();
-    try{localStorage.setItem('rm3',JSON.stringify(sessions))}catch(e){}
-  }
-  cDist=0;cCal=0;lastPaceTime=null;paceHist=[];startTime=null;elSec=0;scInitDist=0;
-  D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};render();
-}
-
-function doDisc(){
-  if(ch)ch.removeEventListener('characteristicvaluechanged',onN);
-  if(dev&&dev.gatt.connected)dev.gatt.disconnect();
-  releaseWake();clearInterval(elTimer);
-  document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block';
-}
+function doReset(){saveSession();cDist=0;cCal=0;lastPaceTime=null;paceHist=[];startTime=null;elSec=0;D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};render()}
+function doDisc(){saveSession();if(ch)ch.removeEventListener('characteristicvaluechanged',onN);if(dev&&dev.gatt.connected)dev.gatt.disconnect();releaseWake();clearInterval(elTimer);document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block'}
 
 async function doConnect(){
   try{document.getElementById('err').textContent='';document.getElementById('go').textContent='Scanning...';
@@ -141,10 +172,7 @@ async function doConnect(){
   var srv=await dev.gatt.connect();var svc=await srv.getPrimaryService(0x1826);
   ch=await svc.getCharacteristic(0x2AD1);await ch.startNotifications();
   ch.addEventListener('characteristicvaluechanged',onN);
-  dev.addEventListener('gattserverdisconnected',function(){
-    document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block';
-    releaseWake();clearInterval(elTimer);
-  });
+  dev.addEventListener('gattserverdisconnected',function(){document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block';releaseWake();clearInterval(elTimer)});
   await requestWake();
   elTimer=setInterval(function(){if(startTime){elSec=Math.floor((Date.now()-startTime)/1000)}},250);
   document.getElementById('app').style.display='none';document.getElementById('dash').style.display='block';
