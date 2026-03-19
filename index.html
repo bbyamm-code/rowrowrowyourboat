@@ -41,7 +41,7 @@ button{font:inherit;border:none;border-radius:8px;cursor:pointer;padding:10px 16
 .bar-lbl{font-size:8px;color:rgba(255,255,255,0.25)}
 .bar-val{font-size:9px;font-weight:600;color:rgba(255,255,255,0.5)}
 </style></head><body>
-<div id="app" style="text-align:center;padding-top:25vh"><h1 style="font-size:26px;margin-bottom:4px">RowMeter</h1><p style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Calibrated for your MR-950</p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-bottom:24px">C2-equivalent · adjustable correction · auto-logs to Sheets</p><button id="go" onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-size:15px;padding:14px 40px;border-radius:40px">Connect Rower</button><p id="err" style="color:#FCA5A5;margin-top:12px;font-size:11px"></p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:20px">iPhone: use Bluefy browser</p></div>
+<div id="app" style="text-align:center;padding-top:25vh"><h1 style="font-size:26px;margin-bottom:4px">RowMeter</h1><p style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Calibrated for your MR-950</p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-bottom:24px">C2-equivalent · adjustable correction · auto-logs to Sheets</p><button id="go" onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-size:15px;padding:14px 40px;border-radius:40px">Connect Rower</button><p id="err" style="color:#FCA5A5;margin-top:12px;font-size:11px"></p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:20px">iPhone: use Bluefy browser</p><button onclick="skipConnect()" style="background:none;color:rgba(255,255,255,0.3);font-size:11px;margin-top:16px;padding:8px 16px;border:1px solid rgba(255,255,255,0.08);border-radius:20px">View sessions &amp; settings without connecting</button></div>
 <div id="dash" style="display:none"></div>
 <div id="modal" style="display:none"></div>
 <div id="toast" class="toast" style="opacity:0"></div>
@@ -223,7 +223,7 @@ function render(){
   var calHr=w2cal(cw);var vel=cp>0?500/cp:0;var dps=D.sc>0?cDist/D.sc:0;
   var z=paceZone(cp);
 
-  var h='<div class="hdr"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 6px rgba(74,222,128,0.4);margin-right:8px"></span><b>'+dev.name+'</b></div><span style="font-size:9px;color:rgba(255,255,255,0.2)">correction '+calStr+'%</span></div>';
+  var isOff=!ch;var h='<div class="hdr"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(isOff?"#555":"#4ADE80")+';box-shadow:'+(isOff?"none":"0 0 6px rgba(74,222,128,0.4)")+';margin-right:8px"></span><b>'+(isOff?"RowMeter":dev.name)+'</b></div><span style="font-size:9px;color:rgba(255,255,255,0.2)">correction '+calStr+'%</span></div>';
 
   // Boat animation
   h+=boatSVG(cp,D.sr,oarAngle);
@@ -256,7 +256,7 @@ function render(){
   // Controls
   h+='<div class="ctr"><button onclick="doReset()" style="background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5)">Save & Reset</button>';
   h+='<button onclick="showCalP=!showCalP;render()" style="background:rgba(240,165,0,0.08);color:#F0A500">Calibrate</button>';
-  h+='<button onclick="doDisc()" style="background:rgba(255,80,80,0.06);color:#FCA5A5">Disconnect</button></div>';
+  h+=''+(isOff?'<button onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E">Connect Rower</button>':'<button onclick="doDisc()" style="background:rgba(255,80,80,0.06);color:#FCA5A5">Disconnect</button>')+'</div>';
 
   // Calibration panel
   if(showCalP){
@@ -284,5 +284,6 @@ function render(){
 function doReset(){if(cDist<20&&D.sc<5){resetState();return}showHRModal(function(a,m){doSave(a,m,resetState)})}
 function doDisc(){var dc=function(){if(ch)ch.removeEventListener('characteristicvaluechanged',onN);if(dev&&dev.gatt.connected)dev.gatt.disconnect();releaseWake();clearInterval(elTimer);document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block'};if(cDist<20&&D.sc<5){dc();return}showHRModal(function(a,m){doSave(a,m,dc)})}
 
+function skipConnect(){dev={name:"Offline"};document.getElementById("app").style.display="none";document.getElementById("dash").style.display="block";render()}
 async function doConnect(){try{document.getElementById('err').textContent='';document.getElementById('go').textContent='Scanning...';if(!navigator.bluetooth)throw new Error('Use Bluefy on iPhone');dev=await navigator.bluetooth.requestDevice({filters:[{services:[0x1826]}]});var srv=await dev.gatt.connect();var svc=await srv.getPrimaryService(0x1826);ch=await svc.getCharacteristic(0x2AD1);await ch.startNotifications();ch.addEventListener('characteristicvaluechanged',onN);dev.addEventListener('gattserverdisconnected',function(){document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block';releaseWake();clearInterval(elTimer)});await requestWake();elTimer=setInterval(function(){if(startTime){elSec=Math.floor((Date.now()-startTime)/1000)}},250);document.getElementById('app').style.display='none';document.getElementById('dash').style.display='block';render()}catch(e){document.getElementById('go').textContent='Connect Rower';if(e.name!=='NotFoundError')document.getElementById('err').textContent=e.message}}
 </script></body></html>
