@@ -56,19 +56,26 @@ var D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};
 var cDist=0,cCal=0,lastPaceTime=null,paceHist=[],splitLog=[],distLog=[];var resetCooldown=0;
 var startTime=null,elSec=0,elTimer=null,lastSR=0,oarAngle=0,prevSc=0;
 var sessions=[];try{var s=localStorage.getItem('rm6');if(s)sessions=JSON.parse(s)}catch(e){}
-// One-time fix v2: merge all fragmented 21/03/2026 sessions into one
-if(!localStorage.getItem('rm6_merged2')&&sessions.length>1){
-  var m21=sessions.filter(function(s){return s.date&&s.date.indexOf('21')>=0&&s.date.indexOf('03')>=0&&s.date.indexOf('2026')>=0});
-  var others=sessions.filter(function(s){return !(s.date&&s.date.indexOf('21')>=0&&s.date.indexOf('03')>=0&&s.date.indexOf('2026')>=0)});
-  if(m21.length>1){
-    var best=m21.reduce(function(a,b){return a.dur>b.dur?a:b});
-    var totalDist=0,totalCal=0,totalStr=0,bestHR=0,bestMaxHR=0;
-    for(var mi=0;mi<m21.length;mi++){totalDist+=m21[mi].dist||0;totalCal+=m21[mi].cal||0;totalStr+=m21[mi].strokes||0;if(m21[mi].avgHR>bestHR)bestHR=m21[mi].avgHR;if(m21[mi].maxHR>bestMaxHR)bestMaxHR=m21[mi].maxHR}
-    var merged={date:best.date,dur:best.dur,dist:totalDist,avgPace:best.avgPace,cal:totalCal,strokes:totalStr,calStr:best.calStr,avgHR:bestHR,maxHR:bestMaxHR};
-    sessions=others.concat([merged]);
-    try{localStorage.setItem('rm6',JSON.stringify(sessions));localStorage.setItem('rm6_merged2','1')}catch(e){}
-  }
-}
+// Fix fragmented sessions: merge all sessions from same date into one
+(function(){
+  if(sessions.length<2)return;
+  var dates={};
+  sessions.forEach(function(s,i){var d=s.date||'';if(!dates[d])dates[d]=[];dates[d].push(i)});
+  var changed=false;
+  var keep=[];
+  Object.keys(dates).forEach(function(d){
+    var idxs=dates[d];
+    if(idxs.length===1){keep.push(sessions[idxs[0]]);return}
+    // Multiple sessions on same date: merge them
+    var items=idxs.map(function(i){return sessions[i]});
+    var best=items.reduce(function(a,b){return(a.dur||0)>(b.dur||0)?a:b});
+    var td=0,tc=0,ts=0,bhr=0,bmhr=0;
+    items.forEach(function(s){td+=(s.dist||0);tc+=(s.cal||0);ts+=(s.strokes||0);if((s.avgHR||0)>bhr)bhr=s.avgHR;if((s.maxHR||0)>bmhr)bmhr=s.maxHR});
+    keep.push({date:best.date,dur:best.dur,dist:td,avgPace:best.avgPace,cal:tc,strokes:ts,calStr:best.calStr,avgHR:bhr,maxHR:bmhr});
+    changed=true;
+  });
+  if(changed){sessions=keep;try{localStorage.setItem('rm6',JSON.stringify(sessions))}catch(e){}}
+})();
 var calStr=70;try{var cs=localStorage.getItem('rm6cal');if(cs)calStr=parseInt(cs)}catch(e){}
 
 // Wake lock
