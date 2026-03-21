@@ -56,6 +56,16 @@ var D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};
 var cDist=0,cCal=0,lastPaceTime=null,paceHist=[],splitLog=[],distLog=[];var resetCooldown=0;
 var startTime=null,elSec=0,elTimer=null,lastSR=0,oarAngle=0,prevSc=0;
 var sessions=[];try{var s=localStorage.getItem('rm6');if(s)sessions=JSON.parse(s)}catch(e){}
+// One-time fix: merge the three fragmented 21/03/2026 sessions into one
+if(!localStorage.getItem('rm6_merged')){
+  var m21=sessions.filter(function(s){return s.date==='21/03/2026'||s.date==='3/21/2026'});
+  if(m21.length===3){
+    var merged={date:m21[0].date,dur:m21[0].dur,dist:m21[0].dist+m21[1].dist+m21[2].dist,avgPace:m21[0].avgPace,cal:m21[0].cal+m21[1].cal+m21[2].cal,strokes:m21[0].strokes+m21[1].strokes+m21[2].strokes,calStr:m21[0].calStr,avgHR:m21[0].avgHR||m21[2].avgHR||0,maxHR:m21[0].maxHR||m21[2].maxHR||0};
+    sessions=sessions.filter(function(s){return s.date!=='21/03/2026'&&s.date!=='3/21/2026'});
+    sessions.push(merged);
+    try{localStorage.setItem('rm6',JSON.stringify(sessions));localStorage.setItem('rm6_merged','1')}catch(e){}
+  }
+}
 var calStr=70;try{var cs=localStorage.getItem('rm6cal');if(cs)calStr=parseInt(cs)}catch(e){}
 
 // Wake lock
