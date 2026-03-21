@@ -53,8 +53,7 @@ var SHEET_URL="https://script.google.com/macros/s/AKfycby-_830IOlFXfYkKIqdm85fIu
 
 var dev,ch,wakeLock=null,showCalP=false;
 var D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};
-var cDist=0,cCal=0,lastPaceTime=null,paceHist=[],splitLog=[],distLog=[],ghostDist=[];
-try{var gd=localStorage.getItem('rm6ghost');if(gd)ghostDist=JSON.parse(gd)}catch(e){}
+var cDist=0,cCal=0,lastPaceTime=null,paceHist=[],splitLog=[],distLog=[];var resetCooldown=0;
 var startTime=null,elSec=0,elTimer=null,lastSR=0,oarAngle=0,prevSc=0;
 var sessions=[];try{var s=localStorage.getItem('rm6');if(s)sessions=JSON.parse(s)}catch(e){}
 var calStr=70;try{var cs=localStorage.getItem('rm6cal');if(cs)calStr=parseInt(cs)}catch(e){}
@@ -100,7 +99,7 @@ function onN(e){
     var elNow=D.et||elSec;if(elNow>0)distLog[elNow]=cDist;
   }
   if(mp500>0&&D.sr>0)lastPaceTime=now;else lastPaceTime=null;
-  if(!startTime&&D.sr>0)startTime=Date.now();
+  if(!startTime&&D.sr>0&&(Date.now()-resetCooldown>3000))startTime=Date.now();
   render();
 }
 
@@ -139,14 +138,14 @@ function doSave(avgHR,maxHR,then){
   var avgMp=D.mAvgPace>0?Math.round(D.mAvgPace/2):0;var avgCp=avgMp>0?cP(avgMp):0;var avgCw=p2w(avgCp);var dur=D.et||elSec;
   var sess={date:new Date().toLocaleDateString(),dur:dur,dist:Math.round(cDist),avgPace:avgCp,cal:Math.round(cCal),strokes:D.sc,calStr:calStr,avgHR:avgHR||0,maxHR:maxHR||0};
   sessions.push(sess);if(sessions.length>50)sessions.shift();
-  try{localStorage.setItem('rm6',JSON.stringify(sessions));localStorage.setItem('rm6ghost',JSON.stringify(distLog))}catch(e){}
+  try{localStorage.setItem('rm6',JSON.stringify(sessions));}catch(e){}
   if(SHEET_URL&&SHEET_URL!=="YOUR_SCRIPT_URL_HERE"){
     var p={date:new Date().toLocaleDateString(),time:new Date().toLocaleTimeString(),duration:fT(dur),distance:Math.round(cDist),avgPace:fP(avgCp),calories:Math.round(cCal),strokes:D.sc,avgWatts:Math.round(avgCw),machPace:fP(avgMp),machDist:D.mDist,correctionPct:calStr,avgHR:avgHR||'',maxHR:maxHR||''};
     fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(p)}).then(function(){showToast('Saved to Google Sheets')}).catch(function(){showToast('Upload failed','rgba(255,80,80,0.15)')});
   }else{showToast('Saved locally')}
   if(then)then();
 }
-function resetState(){cDist=0;cCal=0;lastPaceTime=null;paceHist=[];splitLog=[];distLog=[];startTime=null;elSec=0;prevSc=0;oarAngle=0;D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};render()}
+function resetState(){cDist=0;cCal=0;lastPaceTime=null;paceHist=[];splitLog=[];distLog=[];resetCooldown=Date.now();startTime=null;elSec=0;prevSc=0;oarAngle=0;elSec=0;D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};render()}
 function setCalStr(v){calStr=parseInt(v);try{localStorage.setItem('rm6cal',''+calStr)}catch(e){}render()}
 
 function spark(vals,w,h,col,inv){if(vals.length<2)return'';var mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals),rng=mx-mn||1;var pts=vals.map(function(v,i){var x=(i/(vals.length-1))*w;var n=(v-mn)/rng;var y=inv?(n*(h-6)+3):(h-n*(h-6)-3);return x+','+y}).join(' ');return'<svg width="'+w+'" height="'+h+'" style="display:block;width:100%;height:'+h+'px"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+col+'" stop-opacity="0.2"/><stop offset="100%" stop-color="'+col+'" stop-opacity="0.02"/></linearGradient></defs><polygon points="0,'+h+' '+pts+' '+w+','+h+'" fill="url(#sg)"/><polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round"/></svg>'}
@@ -155,14 +154,16 @@ function spark(vals,w,h,col,inv){if(vals.length<2)return'';var mx=Math.max.apply
 function boatSVG(pace,spm,oa){
   var rowing=spm>0;
   var elNow=D.et||elSec;
-  // Ghost distance at current time
-  var gDist=0;
-  if(ghostDist.length>0&&elNow>0){
-    if(elNow<ghostDist.length&&ghostDist[elNow]!=null)gDist=ghostDist[elNow];
-    else{for(var gi=Math.min(elNow,ghostDist.length-1);gi>=0;gi--){if(ghostDist[gi]!=null){gDist=ghostDist[gi];break}}}
+  // Ghost boat: rows at your all-time average pace (from saved sessions)
+  var avgPaceAll=0,hasGhost=false;
+  if(sessions.length>0){
+    var totalDist=0,totalDur=0;
+    for(var si=0;si<sessions.length;si++){if(sessions[si].dur>0&&sessions[si].dist>0){totalDist+=sessions[si].dist;totalDur+=sessions[si].dur}}
+    if(totalDur>0){avgPaceAll=500/(totalDist/totalDur);hasGhost=true}
   }
-  var hasGhost=ghostDist.length>5;
-  // Relative position: positive = you're ahead
+  // Ghost distance = constant velocity * elapsed time
+  var ghostVel=avgPaceAll>0?500/avgPaceAll:0;
+  var gDist=ghostVel*elNow;
   var diff=cDist-gDist;
   // Map diff to pixel offset: 1 metre = 1.5px, clamped
   var maxOff=60;
@@ -246,19 +247,19 @@ function boatSVG(pace,spm,oa){
     h+='<line x1="4" y1="4" x2="16" y2="4" stroke="rgba(255,255,255,0.06)" stroke-width="0.6"/>';
     h+='<line x1="-16" y1="4" x2="-38" y2="-16" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>';
     h+='<line x1="16" y1="4" x2="38" y2="-16" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>';
-    h+='<text x="10" y="-30" font-size="7" font-family="Courier New" fill="rgba(255,255,255,0.25)">LAST</text>';
+    h+='<text x="10" y="-30" font-size="7" font-family="Courier New" fill="rgba(255,255,255,0.25)">AVG</text>';
     h+='</g>';
   }
   // Delta display
   if(hasGhost&&elNow>5){
     var aheadBehind=diff>=0;
     var absDiff=Math.abs(diff);
-    var label=aheadBehind?("+"+Math.round(absDiff)+"m ahead"):("-"+Math.round(absDiff)+"m behind");
+    var label=aheadBehind?("+"+Math.round(absDiff)+"m ahead of avg"):("-"+Math.round(absDiff)+"m behind avg");
     var col=aheadBehind?"rgba(74,222,128,0.7)":"rgba(239,68,68,0.7)";
     h+='<text x="200" y="12" font-size="9" font-family="Courier New" fill="'+col+'" text-anchor="middle" font-weight="700">'+label+'</text>';
   }
   if(!hasGhost){
-    h+='<text x="200" y="12" font-size="8" font-family="Courier New" fill="rgba(255,255,255,0.15)" text-anchor="middle">Ghost boat appears after your first session</text>';
+    h+='<text x="200" y="12" font-size="8" font-family="Courier New" fill="rgba(255,255,255,0.15)" text-anchor="middle">Ghost boat appears after you save a session</text>';
   }
   h+='</svg></div>';
   return h;
