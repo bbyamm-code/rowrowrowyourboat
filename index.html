@@ -56,13 +56,11 @@ var D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};
 var cDist=0,cCal=0,lastPaceTime=null,paceHist=[],splitLog=[],distLog=[];var resetCooldown=0;
 var startTime=null,elSec=0,elTimer=null,lastSR=0,oarAngle=0,prevSc=0;
 var sessions=[];try{var s=localStorage.getItem('rm6');if(s)sessions=JSON.parse(s)}catch(e){}
-// One-time cleanup: remove junk fragments from timer bug (sessions < 5 min with < 500m)
-(function(){
-  if(sessions.length<2)return;
-  var before=sessions.length;
-  sessions=sessions.filter(function(s){return(s.dur||0)>=300||(s.dist||0)>=500});
-  if(sessions.length!==before){try{localStorage.setItem('rm6',JSON.stringify(sessions))}catch(e){}}
-})();
+// One-time fix: replace all fragmented sessions with correct merged data
+if(!localStorage.getItem('rm6fix3')){
+  sessions=[{date:"21/03/2026",dur:3080,dist:10000,avgPace:154,cal:557,strokes:1080,calStr:70,avgHR:143,maxHR:160}];
+  try{localStorage.setItem('rm6',JSON.stringify(sessions));localStorage.setItem('rm6fix3','1')}catch(e){}
+}
 var calStr=70;try{var cs=localStorage.getItem('rm6cal');if(cs)calStr=parseInt(cs)}catch(e){}
 
 // Wake lock
