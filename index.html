@@ -186,9 +186,16 @@ function boatSVG(pace,spm,oa){
 
   var h='<div class="boat-wrap" style="height:'+totalH+'px">';
   // Water background
+  // Static wave background
   h+='<div style="position:absolute;inset:0;overflow:hidden">';
-  h+='<div style="position:absolute;top:0;left:0;width:200%;height:100%;background:repeating-linear-gradient(90deg,rgba(56,189,248,0.015) 0px,rgba(56,189,248,0.04) 20px,rgba(56,189,248,0.01) 40px);animation:waterScroll '+waterDur+'s linear infinite'+(rowing?'':';animation-play-state:paused')+'"></div>';
-  h+='</div>';
+  h+='<svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="none" style="position:absolute;inset:0;opacity:0.5">';
+  // Gentle wave lines across the water
+  var waveOp=rowing?0.08:0.04;
+  for(var wi=0;wi<6;wi++){
+    var wy=10+wi*18;
+    h+='<path d="M0 '+wy+' Q25 '+(wy-3)+' 50 '+wy+' Q75 '+(wy+3)+' 100 '+wy+' Q125 '+(wy-3)+' 150 '+wy+' Q175 '+(wy+3)+' 200 '+wy+' Q225 '+(wy-3)+' 250 '+wy+' Q275 '+(wy+3)+' 300 '+wy+' Q325 '+(wy-3)+' 350 '+wy+' Q375 '+(wy+3)+' 400 '+wy+'" fill="none" stroke="rgba(56,189,248,'+waveOp+')" stroke-width="0.5"/>';
+  }
+  h+='</svg></div>';
 
   h+='<svg width="100%" viewBox="0 0 '+viewW+' '+totalH+'" style="position:absolute;inset:0">';
 
@@ -257,17 +264,17 @@ function boatSVG(pace,spm,oa){
 
   // === GHOST BOAT ===
   if(hasGhost){
-    h+='<g transform="translate('+ghostX+','+ghostLaneY+')" opacity="0.3">';
+    h+='<g transform="translate('+ghostX+','+ghostLaneY+')">';
     // Ghost wake
-    h+='<path d="M-6 0 Q-18 -3 -30 0 Q-18 3 -6 0" fill="rgba(255,255,255,0.03)"/>';
+    h+='<path d="M-6 0 Q-18 -3 -30 0 Q-18 3 -6 0" fill="rgba(255,255,255,0.08)"/>';
     // Ghost hull
-    h+='<path d="M-22 0 Q-20 -4.5 0 -5 Q20 -4.5 28 -2 L30 0 L28 2 Q20 4.5 0 5 Q-20 4.5 -22 0Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)" stroke-width="0.4" stroke-dasharray="2 2"/>';
+    h+='<path d="M-22 0 Q-20 -4.5 0 -5 Q20 -4.5 28 -2 L30 0 L28 2 Q20 4.5 0 5 Q-20 4.5 -22 0Z" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.35)" stroke-width="0.4"/>';
     h+='<circle cx="0" cy="0" r="2" fill="rgba(255,255,255,0.12)"/>';
     // Ghost oars - static
-    h+='<line x1="0" y1="-4" x2="0" y2="-8" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>';
-    h+='<line x1="0" y1="4" x2="0" y2="8" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>';
-    h+='<line x1="0" y1="-8" x2="-10" y2="-18" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>';
-    h+='<line x1="0" y1="8" x2="-10" y2="18" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>';
+    h+='<line x1="0" y1="-4" x2="0" y2="-8" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>';
+    h+='<line x1="0" y1="4" x2="0" y2="8" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>';
+    h+='<line x1="0" y1="-8" x2="-10" y2="-18" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>';
+    h+='<line x1="0" y1="8" x2="-10" y2="18" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>';
     h+='</g>';
 
     // Connecting line showing gap
