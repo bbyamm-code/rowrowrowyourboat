@@ -378,13 +378,18 @@ function skipConnect(){dev={name:"Offline"};document.getElementById("app").style
 async function doConnect(){
   var goBtn=document.getElementById('go');
   var errEl=document.getElementById('err');
+  var showErr=function(msg){if(errEl&&errEl.offsetParent!==null)errEl.textContent=msg;else alert(msg)};
   try{
     if(goBtn)goBtn.textContent='Scanning...';
     if(errEl)errEl.textContent='';
     if(!navigator.bluetooth)throw new Error('Use Bluefy on iPhone');
+    if(goBtn)goBtn.textContent='Select your rower...';
     dev=await navigator.bluetooth.requestDevice({filters:[{services:[0x1826]}]});
+    if(goBtn)goBtn.textContent='Connecting to '+dev.name+'...';
     var srv=await dev.gatt.connect();
+    if(goBtn)goBtn.textContent='Finding services...';
     var svc=await srv.getPrimaryService(0x1826);
+    if(goBtn)goBtn.textContent='Starting data stream...';
     ch=await svc.getCharacteristic(0x2AD1);
     await ch.startNotifications();
     ch.addEventListener('characteristicvaluechanged',onN);
@@ -392,6 +397,7 @@ async function doConnect(){
       ch=null;
       document.getElementById('dash').style.display='none';
       document.getElementById('app').style.display='block';
+      if(goBtn)goBtn.textContent='Connect Rower';
       releaseWake();clearInterval(elTimer);
     });
     await requestWake();
@@ -401,10 +407,7 @@ async function doConnect(){
     render();
   }catch(e){
     if(goBtn)goBtn.textContent='Connect Rower';
-    if(e.name!=='NotFoundError'){
-      if(errEl)errEl.textContent=e.message;
-      else alert('Connection error: '+e.message);
-    }
+    if(e.name!=='NotFoundError')showErr(e.name+': '+e.message);
   }
 }
 </script></body></html>
