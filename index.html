@@ -375,5 +375,36 @@ function doReset(){if(cDist<20&&D.sc<5){resetState();return}showHRModal(function
 function doDisc(){var dc=function(){if(ch)ch.removeEventListener('characteristicvaluechanged',onN);if(dev&&dev.gatt.connected)dev.gatt.disconnect();releaseWake();clearInterval(elTimer);document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block'};if(cDist<20&&D.sc<5){dc();return}showHRModal(function(a,m){doSave(a,m,dc)})}
 
 function skipConnect(){dev={name:"Offline"};document.getElementById("app").style.display="none";document.getElementById("dash").style.display="block";render()}
-async function doConnect(){try{document.getElementById('err').textContent='';document.getElementById('go').textContent='Scanning...';if(!navigator.bluetooth)throw new Error('Use Bluefy on iPhone');dev=await navigator.bluetooth.requestDevice({filters:[{services:[0x1826]}]});var srv=await dev.gatt.connect();var svc=await srv.getPrimaryService(0x1826);ch=await svc.getCharacteristic(0x2AD1);await ch.startNotifications();ch.addEventListener('characteristicvaluechanged',onN);dev.addEventListener('gattserverdisconnected',function(){document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block';releaseWake();clearInterval(elTimer)});await requestWake();elTimer=setInterval(function(){if(startTime){elSec=Math.floor((Date.now()-startTime)/1000)}},250);document.getElementById('app').style.display='none';document.getElementById('dash').style.display='block';render()}catch(e){document.getElementById('go').textContent='Connect Rower';if(e.name!=='NotFoundError')document.getElementById('err').textContent=e.message}}
+async function doConnect(){
+  var goBtn=document.getElementById('go');
+  var errEl=document.getElementById('err');
+  try{
+    if(goBtn)goBtn.textContent='Scanning...';
+    if(errEl)errEl.textContent='';
+    if(!navigator.bluetooth)throw new Error('Use Bluefy on iPhone');
+    dev=await navigator.bluetooth.requestDevice({filters:[{services:[0x1826]}]});
+    var srv=await dev.gatt.connect();
+    var svc=await srv.getPrimaryService(0x1826);
+    ch=await svc.getCharacteristic(0x2AD1);
+    await ch.startNotifications();
+    ch.addEventListener('characteristicvaluechanged',onN);
+    dev.addEventListener('gattserverdisconnected',function(){
+      ch=null;
+      document.getElementById('dash').style.display='none';
+      document.getElementById('app').style.display='block';
+      releaseWake();clearInterval(elTimer);
+    });
+    await requestWake();
+    elTimer=setInterval(function(){if(startTime){elSec=Math.floor((Date.now()-startTime)/1000)}},250);
+    document.getElementById('app').style.display='none';
+    document.getElementById('dash').style.display='block';
+    render();
+  }catch(e){
+    if(goBtn)goBtn.textContent='Connect Rower';
+    if(e.name!=='NotFoundError'){
+      if(errEl)errEl.textContent=e.message;
+      else alert('Connection error: '+e.message);
+    }
+  }
+}
 </script></body></html>
