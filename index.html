@@ -389,6 +389,7 @@ function render(){
 
   // Controls
   h+='<div class="ctr"><button onclick="doReset()" style="background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.5)">Save & Reset</button>';
+  h+='<button onclick="doDiscard()" style="background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.35)">Discard</button>';
   h+='<button onclick="showCalP=!showCalP;render()" style="background:rgba(240,165,0,0.1);color:#D48E00">Calibrate</button>';
   h+=''+(isOff?'<button onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E">Connect Rower</button>':'<button onclick="doDisc()" style="background:rgba(255,80,80,0.08);color:#DC2626">Disconnect</button>')+'</div>';
 
