@@ -1,32 +1,32 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#0B0C0E"/><title>RowMeter</title>
+<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><meta name="theme-color" content="#F5F1EB"/><title>RowMeter</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0B0C0E;color:#E8E5DD;font:13px/1.5 'Courier New',monospace;padding:12px;max-width:440px;margin:0 auto;overflow-x:hidden}
+body{background:#F5F1EB;color:#2C2B28;font:13px/1.5 'Courier New',monospace;padding:12px;max-width:440px;margin:0 auto;overflow-x:hidden}
 button{font:inherit;border:none;border-radius:8px;cursor:pointer;padding:10px 16px;letter-spacing:0.04em;-webkit-tap-highlight-color:transparent}
 .r{display:flex;gap:8px;margin-bottom:8px}
-.c{flex:1;padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px}
-.ca{border-color:rgba(240,165,0,0.2)}
-.lb{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:2px}
-.bg{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
-.md{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
-.ac{color:#F0A500!important}
-.sm{font-size:9px;color:rgba(255,255,255,0.2);margin-top:2px}
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:8px}
-.ctr{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap}
-.cmp{padding:10px;background:rgba(240,165,0,0.04);border:1px solid rgba(240,165,0,0.1);border-radius:8px;margin-bottom:8px;font-size:11px;color:rgba(255,255,255,0.45)}
-.cmp b{color:#F0A500}
-.spark{padding:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;z-index:99;transition:opacity 0.3s;pointer-events:none}
-.calpanel{margin-top:12px;padding:14px;background:rgba(240,165,0,0.04);border:1px solid rgba(240,165,0,0.1);border-radius:10px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:100}
-.modal-box{background:#1a1a1e;border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:20px;width:90%;max-width:360px}
-.modal-box h3{font-size:16px;font-weight:700;margin-bottom:4px}
-.modal-box p{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:14px}
-.modal-box label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);display:block;margin-bottom:4px}
-.modal-box input[type=number]{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px;color:#E8E5DD;font:16px 'Courier New',monospace;margin-bottom:12px;-webkit-appearance:none}
+.c{flex:1;padding:10px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);border-radius:8px}
+.ca{border-color:rgba(240,165,0,0.35)}
+.lb{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(0,0,0,0.4);margin-bottom:2px}
+.bg{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;color:#2C2B28}
+.md{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;color:#2C2B28}
+.ac{color:#D48E00!important}
+.sm{font-size:9px;color:rgba(0,0,0,0.3);margin-top:2px}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.08);margin-bottom:8px}
+.ctr{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,0,0,0.08);flex-wrap:wrap}
+.cmp{padding:10px;background:rgba(240,165,0,0.06);border:1px solid rgba(240,165,0,0.15);border-radius:8px;margin-bottom:8px;font-size:11px;color:rgba(0,0,0,0.5)}
+.cmp b{color:#D48E00}
+.spark{padding:10px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);border-radius:8px;margin-bottom:8px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;z-index:99;transition:opacity 0.3s;pointer-events:none;color:#2C2B28}
+.calpanel{margin-top:12px;padding:14px;background:rgba(240,165,0,0.06);border:1px solid rgba(240,165,0,0.15);border-radius:10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal-box{background:#FAFAF7;border:1px solid rgba(0,0,0,0.12);border-radius:14px;padding:20px;width:90%;max-width:360px}
+.modal-box h3{font-size:16px;font-weight:700;margin-bottom:4px;color:#2C2B28}
+.modal-box p{font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:14px}
+.modal-box label{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(0,0,0,0.4);display:block;margin-bottom:4px}
+.modal-box input[type=number]{width:100%;background:rgba(0,0,0,0.04);border:1px solid rgba(0,0,0,0.12);border-radius:8px;padding:10px;color:#2C2B28;font:16px 'Courier New',monospace;margin-bottom:12px;-webkit-appearance:none}
 .modal-box .mbtn{display:flex;gap:8px;margin-top:6px}
 /* Boat animation */
-.boat-wrap{position:relative;height:90px;overflow:hidden;margin-bottom:10px;border-radius:8px;background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.04)}
+.boat-wrap{position:relative;height:90px;overflow:hidden;margin-bottom:10px;border-radius:8px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06)}
 .water{position:absolute;bottom:0;left:0;width:200%;height:22px;background:repeating-linear-gradient(90deg,rgba(56,189,248,0.04) 0px,rgba(56,189,248,0.08) 40px,rgba(56,189,248,0.02) 80px);animation:waterScroll 4s linear infinite}
 @keyframes waterScroll{to{transform:translateX(-50%)}}
 .boat-body{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);transition:left 0.1s}
@@ -34,14 +34,14 @@ button{font:inherit;border:none;border-radius:8px;cursor:pointer;padding:10px 16
 /* Pace gauge */
 .gauge-wrap{position:relative;width:100%;height:80px;margin-bottom:8px}
 /* Summary chart */
-.sum-wrap{padding:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:8px}
+.sum-wrap{padding:14px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);border-radius:10px;margin-bottom:8px}
 .bar-row{display:flex;align-items:flex-end;gap:4px;height:100px;margin-top:8px}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
 .bar{border-radius:3px 3px 0 0;width:100%;min-height:4px;transition:height 0.3s}
 .bar-lbl{font-size:8px;color:rgba(255,255,255,0.25)}
 .bar-val{font-size:9px;font-weight:600;color:rgba(255,255,255,0.5)}
 </style></head><body>
-<div id="app" style="text-align:center;padding-top:25vh"><h1 style="font-size:26px;margin-bottom:4px">RowMeter</h1><p style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Calibrated for your MR-950</p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-bottom:24px">C2-equivalent · adjustable correction · auto-logs to Sheets</p><button id="go" onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-size:15px;padding:14px 40px;border-radius:40px">Connect Rower</button><p id="err" style="color:#FCA5A5;margin-top:12px;font-size:11px"></p><p style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:20px">iPhone: use Bluefy browser</p><button onclick="skipConnect()" style="background:none;color:rgba(255,255,255,0.3);font-size:11px;margin-top:16px;padding:8px 16px;border:1px solid rgba(255,255,255,0.08);border-radius:20px">View sessions &amp; settings without connecting</button></div>
+<div id="app" style="text-align:center;padding-top:25vh"><h1 style="font-size:26px;margin-bottom:4px">RowMeter</h1><p style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:6px">Calibrated for your MR-950</p><p style="font-size:10px;color:rgba(0,0,0,0.35);margin-bottom:24px">C2-equivalent · adjustable correction · auto-logs to Sheets</p><button id="go" onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-size:15px;padding:14px 40px;border-radius:40px">Connect Rower</button><p id="err" style="color:#DC2626;margin-top:12px;font-size:11px"></p><p style="font-size:10px;color:rgba(0,0,0,0.35);margin-top:20px">iPhone: use Bluefy browser</p><button onclick="skipConnect()" style="background:none;color:rgba(0,0,0,0.35);font-size:11px;margin-top:16px;padding:8px 16px;border:1px solid rgba(0,0,0,0.1);border-radius:20px">View sessions &amp; settings without connecting</button></div>
 <div id="dash" style="display:none"></div>
 <div id="modal" style="display:none"></div>
 <div id="toast" class="toast" style="opacity:0"></div>
@@ -93,18 +93,21 @@ function onN(e){
   if(D.sc!==prevSc){oarAngle=35;prevSc=D.sc}else if(oarAngle>0){oarAngle=Math.max(0,oarAngle-3)}
   // Accumulate distance only when SPM > 0
   var now=performance.now();var mp500=D.mPace>0?Math.round(D.mPace/2):0;
-  if(mp500>0&&D.sr>0&&lastPaceTime!=null){
-    var dt=(now-lastPaceTime)/1000;var cp=cP(mp500);var v=500/cp;
-    cDist+=v*dt;cCal+=(w2cal(p2w(cp))/3600)*dt;
-    paceHist.push(cp);if(paceHist.length>120)paceHist.shift();
-    // Split logging: record pace every second for 5-min chart
-    var elapsed=D.et||elSec;var bucket=Math.floor(elapsed/300);
-    while(splitLog.length<=bucket)splitLog.push([]);
-    splitLog[bucket].push(cp);
-    var elNow=D.et||elSec;if(elNow>0)distLog[elNow]=cDist;
-  }
-  if(mp500>0&&D.sr>0)lastPaceTime=now;else lastPaceTime=null;
+  if(mp500>0&&D.sr>0){
+    if(lastPaceTime!=null){
+      var dt=Math.min((now-lastPaceTime)/1000,2);
+      var cp=cP(mp500);var v=500/cp;
+      cDist+=v*dt;cCal+=(w2cal(p2w(cp))/3600)*dt;
+      paceHist.push(cp);if(paceHist.length>120)paceHist.shift();
+      var elapsed=D.et||elSec;var bucket=Math.floor(elapsed/300);
+      while(splitLog.length<=bucket)splitLog.push([]);
+      splitLog[bucket].push(cp);
+      var elNow=D.et||elSec;if(elNow>0)distLog[elNow]=cDist;
+    }
+    lastPaceTime=now;
+  }else{lastPaceTime=null;}
   if(!startTime&&D.sr>0&&(Date.now()-resetCooldown>3000))startTime=Date.now();
+  if(startTime)elSec=Math.floor((Date.now()-startTime)/1000);
   render();
 }
 
@@ -133,7 +136,7 @@ function showHRModal(cb){var m=document.getElementById('modal');m.style.display=
     +'<label>Average heart rate</label><input type="number" id="hrAvg" inputmode="numeric" placeholder="e.g. 140">'
     +'<label>Max heart rate</label><input type="number" id="hrMax" inputmode="numeric" placeholder="e.g. 165">'
     +'<div class="mbtn"><button onclick="submitHR(true)" style="flex:1;background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E;font-weight:700">Save</button>'
-    +'<button onclick="submitHR(false)" style="flex:1;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5)">Skip</button></div></div>';
+    +'<button onclick="submitHR(false)" style="flex:1;background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.4)">Skip</button></div></div>';
   m._cb=cb;
 }
 function submitHR(wd){var a=0,mx=0;if(wd){a=parseInt(document.getElementById('hrAvg').value)||0;mx=parseInt(document.getElementById('hrMax').value)||0}document.getElementById('modal').style.display='none';if(document.getElementById('modal')._cb)document.getElementById('modal')._cb(a,mx)}
@@ -190,7 +193,7 @@ function boatSVG(pace,spm,oa){
   h+='<div style="position:absolute;inset:0;overflow:hidden">';
   h+='<svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="none" style="position:absolute;inset:0;opacity:0.5">';
   // Gentle wave lines across the water
-  var waveOp=rowing?0.08:0.04;
+  var waveOp=rowing?0.15:0.08;
   for(var wi=0;wi<6;wi++){
     var wy=10+wi*18;
     h+='<path d="M0 '+wy+' Q25 '+(wy-3)+' 50 '+wy+' Q75 '+(wy+3)+' 100 '+wy+' Q125 '+(wy-3)+' 150 '+wy+' Q175 '+(wy+3)+' 200 '+wy+' Q225 '+(wy-3)+' 250 '+wy+' Q275 '+(wy+3)+' 300 '+wy+' Q325 '+(wy-3)+' 350 '+wy+' Q375 '+(wy+3)+' 400 '+wy+'" fill="none" stroke="rgba(56,189,248,'+waveOp+')" stroke-width="0.5"/>';
@@ -200,15 +203,15 @@ function boatSVG(pace,spm,oa){
   h+='<svg width="100%" viewBox="0 0 '+viewW+' '+totalH+'" style="position:absolute;inset:0">';
 
   // Lane labels on left
-  h+='<text x="4" y="'+(yourLaneY+4)+'" font-size="7" font-family="Courier New" fill="rgba(240,165,0,0.5)">YOU</text>';
-  if(hasGhost)h+='<text x="4" y="'+(ghostLaneY+4)+'" font-size="7" font-family="Courier New" fill="rgba(255,255,255,0.2)">AVG</text>';
+  h+='<text x="4" y="'+(yourLaneY+4)+'" font-size="7" font-family="Courier New" fill="rgba(200,140,0,0.7)">YOU</text>';
+  if(hasGhost)h+='<text x="4" y="'+(ghostLaneY+4)+'" font-size="7" font-family="Courier New" fill="rgba(0,0,0,0.3)">AVG</text>';
 
   // Lane lines
-  h+='<line x1="'+trackL+'" y1="'+(yourLaneY-10)+'" x2="'+trackR+'" y2="'+(yourLaneY-10)+'" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>';
-  h+='<line x1="'+trackL+'" y1="'+(yourLaneY+14)+'" x2="'+trackR+'" y2="'+(yourLaneY+14)+'" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>';
+  h+='<line x1="'+trackL+'" y1="'+(yourLaneY-10)+'" x2="'+trackR+'" y2="'+(yourLaneY-10)+'" stroke="rgba(0,0,0,0.06)" stroke-width="0.5"/>';
+  h+='<line x1="'+trackL+'" y1="'+(yourLaneY+14)+'" x2="'+trackR+'" y2="'+(yourLaneY+14)+'" stroke="rgba(0,0,0,0.06)" stroke-width="0.5"/>';
   if(hasGhost){
-    h+='<line x1="'+trackL+'" y1="'+(ghostLaneY-10)+'" x2="'+trackR+'" y2="'+(ghostLaneY-10)+'" stroke="rgba(255,255,255,0.02)" stroke-width="0.5"/>';
-    h+='<line x1="'+trackL+'" y1="'+(ghostLaneY+14)+'" x2="'+trackR+'" y2="'+(ghostLaneY+14)+'" stroke="rgba(255,255,255,0.02)" stroke-width="0.5"/>';
+    h+='<line x1="'+trackL+'" y1="'+(ghostLaneY-10)+'" x2="'+trackR+'" y2="'+(ghostLaneY-10)+'" stroke="rgba(0,0,0,0.04)" stroke-width="0.5"/>';
+    h+='<line x1="'+trackL+'" y1="'+(ghostLaneY+14)+'" x2="'+trackR+'" y2="'+(ghostLaneY+14)+'" stroke="rgba(0,0,0,0.04)" stroke-width="0.5"/>';
   }
 
   // Distance markers along track
@@ -216,9 +219,9 @@ function boatSVG(pace,spm,oa){
     var markerStep=maxDist<500?100:maxDist<2000?500:maxDist<10000?1000:2000;
     for(var dm=markerStep;dm<maxDist;dm+=markerStep){
       var mx=trackL+(dm/maxDist)*trackW;
-      h+='<line x1="'+mx+'" y1="'+(yourLaneY-10)+'" x2="'+mx+'" y2="'+(hasGhost?ghostLaneY+14:yourLaneY+14)+'" stroke="rgba(255,255,255,0.03)" stroke-width="0.5" stroke-dasharray="1 3"/>';
+      h+='<line x1="'+mx+'" y1="'+(yourLaneY-10)+'" x2="'+mx+'" y2="'+(hasGhost?ghostLaneY+14:yourLaneY+14)+'" stroke="rgba(0,0,0,0.06)" stroke-width="0.5" stroke-dasharray="1 3"/>';
       var lbl=dm>=1000?(dm/1000).toFixed(dm%1000===0?0:1)+'k':dm+'m';
-      h+='<text x="'+mx+'" y="'+(totalH-4)+'" font-size="6" font-family="Courier New" fill="rgba(255,255,255,0.12)" text-anchor="middle">'+lbl+'</text>';
+      h+='<text x="'+mx+'" y="'+(totalH-4)+'" font-size="6" font-family="Courier New" fill="rgba(0,0,0,0.2)" text-anchor="middle">'+lbl+'</text>';
     }
   }
 
@@ -266,15 +269,15 @@ function boatSVG(pace,spm,oa){
   if(hasGhost){
     h+='<g transform="translate('+ghostX+','+ghostLaneY+')">';
     // Ghost wake
-    h+='<path d="M-6 0 Q-18 -3 -30 0 Q-18 3 -6 0" fill="rgba(255,255,255,0.08)"/>';
+    h+='<path d="M-6 0 Q-18 -3 -30 0 Q-18 3 -6 0" fill="rgba(0,0,0,0.04)"/>';
     // Ghost hull
-    h+='<path d="M-22 0 Q-20 -4.5 0 -5 Q20 -4.5 28 -2 L30 0 L28 2 Q20 4.5 0 5 Q-20 4.5 -22 0Z" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.35)" stroke-width="0.4"/>';
+    h+='<path d="M-22 0 Q-20 -4.5 0 -5 Q20 -4.5 28 -2 L30 0 L28 2 Q20 4.5 0 5 Q-20 4.5 -22 0Z" fill="rgba(0,0,0,0.08)" stroke="rgba(0,0,0,0.15)" stroke-width="0.4"/>';
     h+='<circle cx="0" cy="0" r="2" fill="rgba(255,255,255,0.12)"/>';
     // Ghost oars - static
-    h+='<line x1="0" y1="-4" x2="0" y2="-8" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>';
-    h+='<line x1="0" y1="4" x2="0" y2="8" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>';
-    h+='<line x1="0" y1="-8" x2="-10" y2="-18" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>';
-    h+='<line x1="0" y1="8" x2="-10" y2="18" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>';
+    h+='<line x1="0" y1="-4" x2="0" y2="-8" stroke="rgba(0,0,0,0.12)" stroke-width="0.5"/>';
+    h+='<line x1="0" y1="4" x2="0" y2="8" stroke="rgba(0,0,0,0.12)" stroke-width="0.5"/>';
+    h+='<line x1="0" y1="-8" x2="-10" y2="-18" stroke="rgba(0,0,0,0.1)" stroke-width="0.5"/>';
+    h+='<line x1="0" y1="8" x2="-10" y2="18" stroke="rgba(0,0,0,0.1)" stroke-width="0.5"/>';
     h+='</g>';
 
     // Connecting line showing gap
@@ -283,7 +286,7 @@ function boatSVG(pace,spm,oa){
       var lineFromX=Math.min(yourX,ghostX)+30;
       var lineToX=Math.max(yourX,ghostX)+30;
       if(Math.abs(yourX-ghostX)>5){
-        h+='<line x1="'+lineFromX+'" y1="'+(midY-2)+'" x2="'+lineToX+'" y2="'+(midY-2)+'" stroke="rgba(255,255,255,0.06)" stroke-width="0.5" stroke-dasharray="2 2"/>';
+        h+='<line x1="'+lineFromX+'" y1="'+(midY-2)+'" x2="'+lineToX+'" y2="'+(midY-2)+'" stroke="rgba(0,0,0,0.1)" stroke-width="0.5" stroke-dasharray="2 2"/>';
       }
     }
   }
@@ -304,7 +307,7 @@ function boatSVG(pace,spm,oa){
   }
 
   if(!hasGhost){
-    h+='<text x="'+(viewW/2)+'" y="'+(totalH/2)+'" font-size="8" font-family="Courier New" fill="rgba(255,255,255,0.12)" text-anchor="middle">Ghost boat appears after you save a session</text>';
+    h+='<text x="'+(viewW/2)+'" y="'+(totalH/2)+'" font-size="8" font-family="Courier New" fill="rgba(0,0,0,0.2)" text-anchor="middle">Ghost boat appears after you save a session</text>';
   }
 
   h+='</svg></div>';
@@ -339,10 +342,10 @@ function gaugeSVG(cp){
   h+='<line x1="'+cx+'" y1="'+cy+'" x2="'+nx+'" y2="'+ny+'" stroke="#F0A500" stroke-width="2" stroke-linecap="round"/>';
   h+='<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="#F0A500"/>';
   // Zone labels
-  h+='<text x="60" y="68" fill="rgba(56,189,248,0.5)" font-size="8" font-family="Courier New" text-anchor="middle">EASY</text>';
-  h+='<text x="115" y="25" fill="rgba(34,197,94,0.5)" font-size="8" font-family="Courier New" text-anchor="middle">MOD</text>';
-  h+='<text x="205" y="25" fill="rgba(245,158,11,0.5)" font-size="8" font-family="Courier New" text-anchor="middle">HARD</text>';
-  h+='<text x="260" y="68" fill="rgba(239,68,68,0.5)" font-size="8" font-family="Courier New" text-anchor="middle">SPRINT</text>';
+  h+='<text x="60" y="68" fill="rgba(56,150,220,0.7)" font-size="8" font-family="Courier New" text-anchor="middle">EASY</text>';
+  h+='<text x="115" y="25" fill="rgba(34,160,80,0.7)" font-size="8" font-family="Courier New" text-anchor="middle">MOD</text>';
+  h+='<text x="205" y="25" fill="rgba(200,130,10,0.7)" font-size="8" font-family="Courier New" text-anchor="middle">HARD</text>';
+  h+='<text x="260" y="68" fill="rgba(200,60,60,0.7)" font-size="8" font-family="Courier New" text-anchor="middle">SPRINT</text>';
   h+='</svg></div>';
   return h;
 }
@@ -354,14 +357,14 @@ function render(){
   var calHr=w2cal(cw);var vel=cp>0?500/cp:0;var dps=D.sc>0?cDist/D.sc:0;
   var z=paceZone(cp);
 
-  var isOff=!ch;var h='<div class="hdr"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(isOff?"#555":"#4ADE80")+';box-shadow:'+(isOff?"none":"0 0 6px rgba(74,222,128,0.4)")+';margin-right:8px"></span><b>'+(isOff?"RowMeter":dev.name)+'</b></div><span style="font-size:9px;color:rgba(255,255,255,0.2)">correction '+calStr+'%</span></div>';
+  var isOff=!ch;var h='<div class="hdr"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(isOff?"#555":"#4ADE80")+';box-shadow:'+(isOff?"none":"0 0 6px rgba(74,222,128,0.4)")+';margin-right:8px"></span><b>'+(isOff?"RowMeter":dev.name)+'</b></div><span style="font-size:9px;color:rgba(0,0,0,0.3)">correction '+calStr+'%</span></div>';
 
   // Boat animation
   h+=boatSVG(cp,D.sr,oarAngle);
 
   // Timer
-  h+='<div style="text-align:center;margin-bottom:6px"><div style="font-size:48px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.02em">'+fT(D.et||elSec)+'</div>';
-  h+='<div style="font-size:9px;letter-spacing:0.12em;font-weight:700;text-transform:uppercase;color:'+(D.sr>0?z.color:'rgba(255,255,255,0.25)')+';">'+(D.sr>0?z.name:'READY')+'</div></div>';
+  h+='<div style="text-align:center;margin-bottom:6px"><div style="font-size:48px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:#2C2B28">'+fT(D.et||elSec)+'</div>';
+  h+='<div style="font-size:9px;letter-spacing:0.12em;font-weight:700;text-transform:uppercase;color:'+(D.sr>0?z.color:'rgba(0,0,0,0.25)')+';">'+(D.sr>0?z.name:'READY')+'</div></div>';
 
   // Pace gauge
   h+=gaugeSVG(cp);
@@ -385,18 +388,18 @@ function render(){
   if(D.mRes>0){h+='<div class="r"><div class="c"><div class="lb">Resistance</div><div class="md">'+D.mRes+'</div></div></div>'}
 
   // Controls
-  h+='<div class="ctr"><button onclick="doReset()" style="background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5)">Save & Reset</button>';
-  h+='<button onclick="showCalP=!showCalP;render()" style="background:rgba(240,165,0,0.08);color:#F0A500">Calibrate</button>';
-  h+=''+(isOff?'<button onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E">Connect Rower</button>':'<button onclick="doDisc()" style="background:rgba(255,80,80,0.06);color:#FCA5A5">Disconnect</button>')+'</div>';
+  h+='<div class="ctr"><button onclick="doReset()" style="background:rgba(0,0,0,0.05);color:rgba(0,0,0,0.5)">Save & Reset</button>';
+  h+='<button onclick="showCalP=!showCalP;render()" style="background:rgba(240,165,0,0.1);color:#D48E00">Calibrate</button>';
+  h+=''+(isOff?'<button onclick="doConnect()" style="background:linear-gradient(135deg,#F0A500,#D48E00);color:#0B0C0E">Connect Rower</button>':'<button onclick="doDisc()" style="background:rgba(255,80,80,0.08);color:#DC2626">Disconnect</button>')+'</div>';
 
   // Calibration panel
   if(showCalP){
     h+='<div class="calpanel"><div class="lb" style="color:#F0A500;margin-bottom:6px">Correction Strength</div>';
-    h+='<p style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;line-height:1.6">0% = raw machine pace · 100% = full calibration</p>';
+    h+='<p style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:10px;line-height:1.6">0% = raw machine pace · 100% = full calibration</p>';
     h+='<div style="display:flex;align-items:center;gap:10px"><input type="range" min="0" max="100" step="5" value="'+calStr+'" oninput="setCalStr(this.value)" style="flex:1;accent-color:#F0A500"/>';
     h+='<span style="font-size:18px;font-weight:700;color:#F0A500;min-width:45px;text-align:right">'+calStr+'%</span></div>';
     h+='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">';
-    [0,25,50,70,85,100].forEach(function(v){var sel=calStr===v;h+='<button onclick="setCalStr('+v+')" style="padding:5px 10px;font-size:10px;background:'+(sel?'rgba(240,165,0,0.2)':'rgba(255,255,255,0.04)')+';color:'+(sel?'#F0A500':'rgba(255,255,255,0.35)')+'">'+v+'%</button>'});
+    [0,25,50,70,85,100].forEach(function(v){var sel=calStr===v;h+='<button onclick="setCalStr('+v+')" style="padding:5px 10px;font-size:10px;background:'+(sel?'rgba(240,165,0,0.15)':'rgba(0,0,0,0.05)')+';color:'+(sel?'#D48E00':'rgba(0,0,0,0.35)')+'">'+v+'%</button>'});
     h+='</div></div>';
   }
 
@@ -404,14 +407,15 @@ function render(){
   if(sessions.length>0){
     h+='<div style="margin-top:16px"><div class="lb" style="margin-bottom:8px">Past sessions</div>';
     for(var i=sessions.length-1;i>=Math.max(0,sessions.length-10);i--){var ss=sessions[i];
-      h+='<div style="padding:6px 8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:6px;margin-bottom:4px;font-size:10px;color:rgba(255,255,255,0.4)">';
-      h+='<span style="color:rgba(255,255,255,0.55)">'+ss.date+'</span> \u00B7 '+fT(ss.dur)+' \u00B7 '+fD(ss.dist)+' \u00B7 '+fP(ss.avgPace)+'/500m \u00B7 '+ss.cal+'kcal \u00B7 '+ss.strokes+'str';
+      h+='<div style="padding:6px 8px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06);border-radius:6px;margin-bottom:4px;font-size:10px;color:rgba(0,0,0,0.45)">';
+      h+='<span style="color:rgba(0,0,0,0.6)">'+ss.date+'</span> \u00B7 '+fT(ss.dur)+' \u00B7 '+fD(ss.dist)+' \u00B7 '+fP(ss.avgPace)+'/500m \u00B7 '+ss.cal+'kcal \u00B7 '+ss.strokes+'str';
       if(ss.avgHR>0)h+=' \u00B7 \u2665'+ss.avgHR;if(ss.maxHR>0)h+='/'+ss.maxHR;h+='</div>';}
     h+='</div>';
   }
   document.getElementById('dash').innerHTML=h;
 }
 
+function doDiscard(){if(confirm('Discard this session without saving?'))resetState()}
 function doReset(){if(cDist<20&&D.sc<5){resetState();return}showHRModal(function(a,m){doSave(a,m,resetState)})}
 function doDisc(){var dc=function(){if(ch)ch.removeEventListener('characteristicvaluechanged',onN);if(dev&&dev.gatt.connected)dev.gatt.disconnect();releaseWake();clearInterval(elTimer);document.getElementById('dash').style.display='none';document.getElementById('app').style.display='block'};if(cDist<20&&D.sc<5){dc();return}showHRModal(function(a,m){doSave(a,m,dc)})}
 
