@@ -54,7 +54,7 @@ var SHEET_URL="https://script.google.com/macros/s/AKfycby-_830IOlFXfYkKIqdm85fIu
 var dev,ch,wakeLock=null,showCalP=false;
 var D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};
 var cDist=0,cCal=0,lastPaceTime=null,paceHist=[],splitLog=[],distLog=[];var resetCooldown=0;
-var startTime=null,elSec=0,elTimer=null,lastSR=0,oarAngle=0,prevSc=0;
+var startTime=null,elSec=0,elTimer=null,lastSR=0,oarAngle=0,prevSc=0,etOffset=0;
 var sessions=[];try{var s=localStorage.getItem('rm6');if(s)sessions=JSON.parse(s)}catch(e){}
 // One-time fix: replace all fragmented sessions with correct merged data
 if(!localStorage.getItem('rm6fix3')){
@@ -99,10 +99,10 @@ function onN(e){
       var cp=cP(mp500);var v=500/cp;
       cDist+=v*dt;cCal+=(w2cal(p2w(cp))/3600)*dt;
       paceHist.push(cp);if(paceHist.length>120)paceHist.shift();
-      var elapsed=D.et||elSec;var bucket=Math.floor(elapsed/300);
+      var elapsed=(D.et>etOffset?D.et-etOffset:0)||elSec;var bucket=Math.floor(elapsed/300);
       while(splitLog.length<=bucket)splitLog.push([]);
       splitLog[bucket].push(cp);
-      var elNow=D.et||elSec;if(elNow>0)distLog[elNow]=cDist;
+      var elNow=(D.et>etOffset?D.et-etOffset:0)||elSec;if(elNow>0)distLog[elNow]=cDist;
     }
     lastPaceTime=now;
   }else{lastPaceTime=null;}
@@ -143,7 +143,7 @@ function submitHR(wd){var a=0,mx=0;if(wd){a=parseInt(document.getElementById('hr
 
 function doSave(avgHR,maxHR,then){
   if(cDist<20&&D.sc<5){if(then)then();return}
-  var avgMp=D.mAvgPace>0?Math.round(D.mAvgPace/2):0;var avgCp=avgMp>0?cP(avgMp):0;var avgCw=p2w(avgCp);var dur=D.et||elSec;
+  var avgMp=D.mAvgPace>0?Math.round(D.mAvgPace/2):0;var avgCp=avgMp>0?cP(avgMp):0;var avgCw=p2w(avgCp);var dur=(D.et>etOffset?D.et-etOffset:0)||elSec;
   var sess={date:new Date().toLocaleDateString(),dur:dur,dist:Math.round(cDist),avgPace:avgCp,cal:Math.round(cCal),strokes:D.sc,calStr:calStr,avgHR:avgHR||0,maxHR:maxHR||0};
   sessions.push(sess);if(sessions.length>50)sessions.shift();
   try{localStorage.setItem('rm6',JSON.stringify(sessions));}catch(e){}
@@ -153,7 +153,7 @@ function doSave(avgHR,maxHR,then){
   }else{showToast('Saved locally')}
   if(then)then();
 }
-function resetState(){cDist=0;cCal=0;lastPaceTime=null;paceHist=[];splitLog=[];distLog=[];resetCooldown=Date.now();startTime=null;elSec=0;prevSc=0;oarAngle=0;elSec=0;D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};render()}
+function resetState(){etOffset=D.et||0;cDist=0;cCal=0;lastPaceTime=null;paceHist=[];splitLog=[];distLog=[];resetCooldown=Date.now();startTime=null;elSec=0;prevSc=0;oarAngle=0;D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};render()}
 function setCalStr(v){calStr=parseInt(v);try{localStorage.setItem('rm6cal',''+calStr)}catch(e){}render()}
 
 function spark(vals,w,h,col,inv){if(vals.length<2)return'';var mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals),rng=mx-mn||1;var pts=vals.map(function(v,i){var x=(i/(vals.length-1))*w;var n=(v-mn)/rng;var y=inv?(n*(h-6)+3):(h-n*(h-6)-3);return x+','+y}).join(' ');return'<svg width="'+w+'" height="'+h+'" style="display:block;width:100%;height:'+h+'px"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+col+'" stop-opacity="0.2"/><stop offset="100%" stop-color="'+col+'" stop-opacity="0.02"/></linearGradient></defs><polygon points="0,'+h+' '+pts+' '+w+','+h+'" fill="url(#sg)"/><polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round"/></svg>'}
@@ -161,7 +161,7 @@ function spark(vals,w,h,col,inv){if(vals.length<2)return'';var mx=Math.max.apply
 // Boat SVG
 function boatSVG(pace,spm,oa){
   var rowing=spm>0;
-  var elNow=D.et||elSec;
+  var elNow=(D.et>etOffset?D.et-etOffset:0)||elSec;
   // Ghost: all-time average pace
   var avgPaceAll=0,hasGhost=false;
   if(sessions.length>0){
@@ -363,7 +363,7 @@ function render(){
   h+=boatSVG(cp,D.sr,oarAngle);
 
   // Timer
-  h+='<div style="text-align:center;margin-bottom:6px"><div style="font-size:48px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:#2C2B28">'+fT(D.et||elSec)+'</div>';
+  h+='<div style="text-align:center;margin-bottom:6px"><div style="font-size:48px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:#2C2B28">'+fT((D.et>etOffset?D.et-etOffset:0)||elSec)+'</div>';
   h+='<div style="font-size:9px;letter-spacing:0.12em;font-weight:700;text-transform:uppercase;color:'+(D.sr>0?z.color:'rgba(0,0,0,0.25)')+';">'+(D.sr>0?z.name:'READY')+'</div></div>';
 
   // Pace gauge
