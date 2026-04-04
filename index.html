@@ -106,8 +106,8 @@ function onN(e){
     }
     lastPaceTime=now;
   }else{lastPaceTime=null;}
-  if(!startTime&&D.sr>0&&(Date.now()-resetCooldown>3000))startTime=Date.now();
-  if(startTime)elSec=Math.floor((Date.now()-startTime)/1000);
+  if(!startTime&&D.sr>0&&(Date.now()-resetCooldown>3000)){startTime=Date.now();elSec=0}
+  if(startTime){elSec=Math.floor((Date.now()-startTime)/1000)}
   render();
 }
 
