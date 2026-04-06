@@ -144,16 +144,17 @@ function submitHR(wd){var a=0,mx=0;if(wd){a=parseInt(document.getElementById('hr
 function doSave(avgHR,maxHR,then){
   if(cDist<20&&D.sc<5){if(then)then();return}
   var avgMp=D.mAvgPace>0?Math.round(D.mAvgPace/2):0;var avgCp=avgMp>0?cP(avgMp):0;var avgCw=p2w(avgCp);var dur=(D.et>etOffset?D.et-etOffset:0)||elSec;
-  var sess={date:new Date().toLocaleDateString(),dur:dur,dist:Math.round(cDist),avgPace:avgCp,cal:Math.round(cCal),strokes:D.sc,calStr:calStr,avgHR:avgHR||0,maxHR:maxHR||0};
+  var sess={date:new Date().toLocaleDateString(),dur:dur,dist:Math.round(cDist),avgPace:avgCp,cal:Math.round(cCal),strokes:D.sc,calStr:Math.round(effectiveCal()),res:userRes,avgHR:avgHR||0,maxHR:maxHR||0};
   sessions.push(sess);if(sessions.length>50)sessions.shift();
   try{localStorage.setItem('rm6',JSON.stringify(sessions));}catch(e){}
   if(SHEET_URL&&SHEET_URL!=="YOUR_SCRIPT_URL_HERE"){
-    var p={date:new Date().toLocaleDateString(),time:new Date().toLocaleTimeString(),duration:fT(dur),distance:Math.round(cDist),avgPace:fP(avgCp),calories:Math.round(cCal),strokes:D.sc,avgWatts:Math.round(avgCw),machPace:fP(avgMp),machDist:D.mDist,correctionPct:calStr,avgHR:avgHR||'',maxHR:maxHR||''};
+    var p={date:new Date().toLocaleDateString(),time:new Date().toLocaleTimeString(),duration:fT(dur),distance:Math.round(cDist),avgPace:fP(avgCp),calories:Math.round(cCal),strokes:D.sc,avgWatts:Math.round(avgCw),machPace:fP(avgMp),machDist:D.mDist,correctionPct:Math.round(effectiveCal()),resistanceLevel:userRes,avgHR:avgHR||'',maxHR:maxHR||''};
     fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(p)}).then(function(){showToast('Saved to Google Sheets')}).catch(function(){showToast('Upload failed','rgba(255,80,80,0.15)')});
   }else{showToast('Saved locally')}
   if(then)then();
 }
 function resetState(){etOffset=D.et||0;cDist=0;cCal=0;lastPaceTime=null;paceHist=[];splitLog=[];distLog=[];resetCooldown=Date.now();startTime=null;elSec=0;prevSc=0;oarAngle=0;D={sr:0,sc:0,mW:0,mAvgW:0,mDist:0,mPace:0,mAvgPace:0,et:0,te:0,hr:0,mRes:0};render()}
+function setRes(v){userRes=parseInt(v);try{localStorage.setItem('rm6res',''+userRes)}catch(e){}render()}
 function setCalStr(v){calStr=parseInt(v);try{localStorage.setItem('rm6cal',''+calStr)}catch(e){}render()}
 
 function spark(vals,w,h,col,inv){if(vals.length<2)return'';var mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals),rng=mx-mn||1;var pts=vals.map(function(v,i){var x=(i/(vals.length-1))*w;var n=(v-mn)/rng;var y=inv?(n*(h-6)+3):(h-n*(h-6)-3);return x+','+y}).join(' ');return'<svg width="'+w+'" height="'+h+'" style="display:block;width:100%;height:'+h+'px"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+col+'" stop-opacity="0.2"/><stop offset="100%" stop-color="'+col+'" stop-opacity="0.02"/></linearGradient></defs><polygon points="0,'+h+' '+pts+' '+w+','+h+'" fill="url(#sg)"/><polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round"/></svg>'}
@@ -357,8 +358,23 @@ function render(){
   var calHr=w2cal(cw);var vel=cp>0?500/cp:0;var dps=D.sc>0?cDist/D.sc:0;
   var z=paceZone(cp);
 
-  var isOff=!ch;var h='<div class="hdr"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(isOff?"#555":"#4ADE80")+';box-shadow:'+(isOff?"none":"0 0 6px rgba(74,222,128,0.4)")+';margin-right:8px"></span><b>'+(isOff?"RowMeter":dev.name)+'</b></div><span style="font-size:9px;color:rgba(0,0,0,0.3)">correction '+calStr+'%</span></div>';
+  var isOff=!ch;var h='<div class="hdr"><div><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(isOff?"#555":"#4ADE80")+';box-shadow:'+(isOff?"none":"0 0 6px rgba(74,222,128,0.4)")+';margin-right:8px"></span><b>'+(isOff?"RowMeter":dev.name)+'</b></div><span style="font-size:9px;color:rgba(0,0,0,0.3)">correction '+Math.round(effectiveCal())+'%</span></div>';
 
+  // Resistance selector (shown when not yet rowing)
+  if(!startTime){
+    h+='<div style="padding:12px;background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.08);border-radius:10px;margin-bottom:10px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    h+='<span style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(0,0,0,0.4)">Magnetic Resistance Level</span>';
+    h+='<span style="font-size:18px;font-weight:700;color:#D48E00">'+userRes+'/16</span></div>';
+    h+='<div style="display:flex;align-items:center;gap:10px">';
+    h+='<input type="range" min="1" max="16" step="1" value="'+userRes+'" oninput="setRes(this.value)" style="flex:1;accent-color:#D48E00"/></div>';
+    h+='<div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap">';
+    [1,4,6,8,10,12,16].forEach(function(v){var sel=userRes===v;
+      h+='<button onclick="setRes('+v+')" style="padding:4px 8px;font-size:10px;border-radius:6px;background:'+(sel?'rgba(240,165,0,0.15)':'rgba(0,0,0,0.04)')+';color:'+(sel?'#D48E00':'rgba(0,0,0,0.35)')+'">'+(v)+'</button>'});
+    h+='</div>';
+    h+='<div style="font-size:9px;color:rgba(0,0,0,0.3);margin-top:6px">Correction: '+calStr+'% base → '+Math.round(effectiveCal())+'% effective</div>';
+    h+='</div>';
+  }
   // Boat animation
   h+=boatSVG(cp,D.sr,oarAngle);
 
@@ -396,7 +412,7 @@ function render(){
   // Calibration panel
   if(showCalP){
     h+='<div class="calpanel"><div class="lb" style="color:#F0A500;margin-bottom:6px">Correction Strength</div>';
-    h+='<p style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:10px;line-height:1.6">0% = raw machine pace · 100% = full calibration</p>';
+    h+='<p style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:10px;line-height:1.6">0% = raw machine pace · 100% = full calibration<br>Adjusted for resistance level: '+userRes+'/16 → '+Math.round(effectiveCal())+'% effective</p>';
     h+='<div style="display:flex;align-items:center;gap:10px"><input type="range" min="0" max="100" step="5" value="'+calStr+'" oninput="setCalStr(this.value)" style="flex:1;accent-color:#F0A500"/>';
     h+='<span style="font-size:18px;font-weight:700;color:#F0A500;min-width:45px;text-align:right">'+calStr+'%</span></div>';
     h+='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">';
