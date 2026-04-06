@@ -72,7 +72,8 @@ function showToast(msg,c){var t=document.getElementById('toast');t.textContent=m
 // Calibration
 var CM=[101,109,118,129],CC=[110,130,159,170];
 function maxCorr(mp){if(mp<=0||mp>600)return 0;var tgt=mp;if(mp<=CM[0]){tgt=CC[0]+(CC[1]-CC[0])/(CM[1]-CM[0])*(mp-CM[0])}else if(mp>=CM[3]){tgt=CC[3]+(CC[3]-CC[2])/(CM[3]-CM[2])*(mp-CM[3])}else{for(var i=0;i<3;i++){if(mp>=CM[i]&&mp<=CM[i+1]){tgt=CC[i]+((mp-CM[i])/(CM[i+1]-CM[i]))*(CC[i+1]-CC[i]);break}}}return tgt-mp}
-function cP(mp){return mp<=0||mp>600?mp:mp+maxCorr(mp)*(calStr/100)}
+function effectiveCal(){var adj=calStr+(userRes-6)*8.5;return Math.max(0,Math.min(100,adj))}
+function cP(mp){return mp<=0||mp>600?mp:mp+maxCorr(mp)*(effectiveCal()/100)}
 function p2w(p){if(p<=0)return 0;var v=500/p;return 2.8*v*v*v}
 function w2cal(w){return w<=0?0:(4*w*0.8604)+300}
 function fP(s){if(!s||!isFinite(s)||s<=0)return"\u2013:\u2013\u2013";var m=Math.floor(s/60),se=Math.floor(s%60),t=Math.floor((s%1)*10);return m+":"+String(se).padStart(2,"0")+"."+t}
